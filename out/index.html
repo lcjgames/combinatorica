@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <title>Combinatorica</title>
+</head>
+<body>
+<h1>Combinatorica</h1>
+A game made for the second Bevy game jam. Sprites taken from <a href="https://www.kenney.nl/">Kenney</a>.
+<br>
+<a href="https://github.com/lcjgames/combinatorica">Repo</a>
+<br>
+<h2>How to Play</h2>
+TODO
+<br><br>
+<script>
+    (function () {
+      const audioContextList = [];
+      const userInputEventNames = [
+        "click",
+        "contextmenu",
+        "auxclick",
+        "dblclick",
+        "mousedown",
+        "mouseup",
+        "pointerup",
+        "touchend",
+        "keydown",
+        "keyup",
+      ];
+      self.AudioContext = new Proxy(self.AudioContext, {
+        construct(target, args) {
+          const result = new target(...args);
+          audioContextList.push(result);
+          return result;
+        },
+      });
+      function resumeAllContexts(_event) {
+        let count = 0;
+        audioContextList.forEach((context) => {
+          if (context.state !== "running") {
+            context.resume();
+          } else {
+            count++;
+          }
+        });
+        if (count > 0 && count === audioContextList.length) {
+          userInputEventNames.forEach((eventName) => {
+            document.removeEventListener(eventName, resumeAllContexts);
+          });
+        }
+      }
+      userInputEventNames.forEach((eventName) => {
+        document.addEventListener(eventName, resumeAllContexts);
+      });
+    })();
+    </script>
+<script type="module">
+    import init from './pkg/combinatorica.js';
+
+    async function run() {
+      await init('./pkg/combinatorica.wasm');
+    }
+
+    run();
+  </script>
+</body>
+</html>

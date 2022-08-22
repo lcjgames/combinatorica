@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: rustfmt
+      - uses: actions-rs/cargo@v1
+
+      - name: Check formatting
+        run: cargo fmt --check --all
+
+      #- name: Run tests
+      #  run: cargo test -p db -p cash-overflow-backend -- --test-threads 1
+
+      #- name: Generate docs
+      #  run: cargo doc -p db -p cash-overflow-backend
+
+      - name: Build
+        run: cargo build --release
