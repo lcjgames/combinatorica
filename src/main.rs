@@ -3,6 +3,9 @@ use bevy::prelude::*;
 mod camera;
 use camera::*;
 
+mod fleet_editor;
+use fleet_editor::*;
+
 mod input;
 use input::*;
 
@@ -117,6 +120,7 @@ fn main() {
     console_log!("Starting Game!");
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugin(FleetEditor)
         .add_plugin(Loading)
         .add_plugin(MainMenu)
         .add_startup_system(spawn_main_camera)
