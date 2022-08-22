@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::camera::MainCamera;
-use crate::state::AppState;
+use crate::state::*;
 
 pub struct MainMenu;
 
@@ -10,7 +10,8 @@ impl Plugin for MainMenu {
         app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_background))
             .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_title))
             .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_buttons))
-            .add_system_set(SystemSet::on_update(AppState::MainMenu).with_system(activate_buttons));
+            .add_system_set(SystemSet::on_update(AppState::MainMenu).with_system(activate_buttons))
+            .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(screen_cleanup));
     }
 }
 
@@ -36,32 +37,36 @@ fn display_background(
                 start_position + Vec3::new((i * size) as f32, (j * size) as f32, 0.0),
             )
             .with_rotation(Quat::from_axis_angle(Vec3::Z, angle));
-            commands.spawn_bundle(SpriteBundle {
-                texture: bg.clone(),
-                transform,
-                ..default()
-            });
+            commands
+                .spawn_bundle(SpriteBundle {
+                    texture: bg.clone(),
+                    transform,
+                    ..default()
+                })
+                .insert(Screen(AppState::MainMenu));
         }
     }
 }
 
 fn display_title(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn_bundle(
-        TextBundle::from_section(
-            "Combinatorica",
-            TextStyle {
-                font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
-                font_size: 100.0,
-                color: Color::ALICE_BLUE,
-            },
+    commands
+        .spawn_bundle(
+            TextBundle::from_section(
+                "Combinatorica",
+                TextStyle {
+                    font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                    font_size: 100.0,
+                    color: Color::ALICE_BLUE,
+                },
+            )
+            .with_text_alignment(TextAlignment::TOP_CENTER)
+            .with_style(Style {
+                align_self: AlignSelf::Center,
+                position_type: PositionType::Absolute,
+                ..default()
+            }),
         )
-        .with_text_alignment(TextAlignment::TOP_CENTER)
-        .with_style(Style {
-            align_self: AlignSelf::Center,
-            position_type: PositionType::Absolute,
-            ..default()
-        }),
-    );
+        .insert(Screen(AppState::MainMenu));
 }
 
 fn display_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -86,7 +91,8 @@ fn display_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                     color: Color::DARK_GRAY,
                 },
             ));
-        });
+        })
+        .insert(Screen(AppState::MainMenu));
 }
 
 pub fn activate_buttons(
