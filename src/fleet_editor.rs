@@ -9,7 +9,7 @@ impl Plugin for FleetEditor {
     fn build(&self, app: &mut App) {
         app
             .add_system_set(SystemSet::on_enter(AppState::FleetEditor).with_system(display_ships))
-            // .add_system_set(SystemSet::on_update(AppState::FleetEditor).with_system(activate_ships))
+            .add_system_set(SystemSet::on_update(AppState::FleetEditor).with_system(activate_ships))
             .add_system_set(SystemSet::on_exit(AppState::FleetEditor).with_system(screen_cleanup));
     }
 }
@@ -94,4 +94,19 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .insert(Screen(AppState::MainMenu));
         }
     });
+}
+
+pub fn activate_ships(
+    mut query: Query<(&Interaction, &mut UiColor), (Changed<Interaction>, With<Button>)>,
+) {
+    for (interaction, mut color) in query.iter_mut() {
+        *color = match *interaction {
+            Interaction::Hovered => Color::GRAY.into(),
+            Interaction::None => Color::ALICE_BLUE.into(),
+            Interaction::Clicked => {
+                //TODO
+                Color::ALICE_BLUE.into()
+            }
+        }
+    }
 }
