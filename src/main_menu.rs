@@ -9,7 +9,8 @@ impl Plugin for MainMenu {
     fn build(&self, app: &mut App) {
         app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_background))
             .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_title))
-            .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_buttons));
+            .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_buttons))
+            .add_system_set(SystemSet::on_update(AppState::MainMenu).with_system(activate_buttons));
     }
 }
 
@@ -73,7 +74,7 @@ fn display_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 align_items: AlignItems::Center,
                 ..default()
             },
-            color: UiColor::from(Color::ALICE_BLUE),
+            color: Color::ALICE_BLUE.into(),
             ..default()
         })
         .with_children(|parent| {
@@ -86,4 +87,20 @@ fn display_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
             ));
         });
+}
+
+pub fn activate_buttons(
+    mut state: ResMut<State<AppState>>,
+    mut query: Query<(&Interaction, &mut UiColor), (Changed<Interaction>, With<Button>)>,
+) {
+    for (interaction, mut color) in query.iter_mut() {
+        *color = match *interaction {
+            Interaction::Hovered => Color::GRAY.into(),
+            Interaction::None => Color::ALICE_BLUE.into(),
+            Interaction::Clicked => {
+                state.set(AppState::FleetEditor).unwrap();
+                Color::ALICE_BLUE.into()
+            }
+        }
+    }
 }
