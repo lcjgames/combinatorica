@@ -1,10 +1,19 @@
 use bevy::prelude::*;
 
+mod camera;
+use camera::*;
+
 mod input;
 use input::*;
 
 mod loading;
 use loading::*;
+
+#[macro_use]
+mod log;
+
+mod main_menu;
+use main_menu::*;
 
 mod movement;
 use movement::*;
@@ -101,12 +110,19 @@ pub fn spawn(
 }
 
 fn main() {
+    // When building for WASM, print panics to the browser console
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+
+    console_log!("Starting Game!");
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(Loading)
-        .add_system_set(SystemSet::on_enter(AppState::Game).with_system(spawn))
-        .add_system_set(SystemSet::on_update(AppState::Game).with_system(animate_sprite))
-        .add_system_set(SystemSet::on_update(AppState::Game).with_system(input_handling))
-        .add_system_set(SystemSet::on_update(AppState::Game).with_system(movement))
+        .add_plugin(MainMenu)
+        .add_startup_system(spawn_main_camera)
+        .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn))
+        .add_system_set(SystemSet::on_update(AppState::Battle).with_system(animate_sprite))
+        .add_system_set(SystemSet::on_update(AppState::Battle).with_system(input_handling))
+        .add_system_set(SystemSet::on_update(AppState::Battle).with_system(movement))
         .run();
 }
