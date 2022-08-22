@@ -7,8 +7,9 @@ pub struct MainMenu;
 
 impl Plugin for MainMenu {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_background));
-        app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_title));
+        app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_background))
+            .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_title))
+            .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_buttons));
     }
 }
 
@@ -57,12 +58,32 @@ fn display_title(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_style(Style {
             align_self: AlignSelf::Center,
             position_type: PositionType::Absolute,
-            // position: UiRect {
-            //     bottom: Val::Px(5.0),
-            //     right: Val::Px(15.0),
-            //     ..default()
-            // },
             ..default()
         }),
     );
+}
+
+fn display_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands
+        .spawn_bundle(ButtonBundle {
+            style: Style {
+                size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+                margin: UiRect::new(Val::Percent(10.0), Val::Auto, Val::Auto, Val::Percent(10.0)),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            color: UiColor::from(Color::ALICE_BLUE),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn_bundle(TextBundle::from_section(
+                "Start",
+                TextStyle {
+                    font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                    font_size: 35.0,
+                    color: Color::DARK_GRAY,
+                },
+            ));
+        });
 }
