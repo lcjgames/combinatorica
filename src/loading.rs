@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::render::render_resource::BindingType::Texture;
 
 use crate::sprites::{GroundTiles, SpriteSheets};
 use crate::state::AppState;
@@ -68,7 +69,7 @@ fn check_loading(
     match server.get_group_load_state(loading.iter().map(|h| h.id)) {
         LoadState::Loaded => {
             commands.remove_resource::<AssetsLoading>();
-            state.set(AppState::Game).unwrap();
+            state.set(AppState::MainMenu).unwrap();
         }
         LoadState::NotLoaded | LoadState::Loading | LoadState::Unloaded => {}
         LoadState::Failed => {
