@@ -19,19 +19,21 @@ fn display_background(
 ) {
     let window = windows.get_primary().unwrap();
     let window_size = Vec3::new(window.width(), window.height(), 0.0);
-    let start_position = - window_size / 2.0;
+    let start_position = -window_size / 2.0;
 
     let bg = asset_server.load("spaceshooter/Backgrounds/black.png");
     let size = 256;
-    let n_horizontal = window.width().round() as i32/size + 2;
-    let n_vertical = window.height().round() as i32/size + 2;
+    let n_horizontal = window.width().round() as i32 / size + 2;
+    let n_vertical = window.height().round() as i32 / size + 2;
 
     for i in 0..n_horizontal {
         for j in 0..n_vertical {
-            let random_stuff = ((i+j)%4) as f32;
-            let angle = random_stuff * std::f32::consts::PI/2.0;
-            let transform = Transform::from_translation(start_position + Vec3::new((i * size) as f32, (j*size) as f32, 0.0))
-                .with_rotation(Quat::from_axis_angle(Vec3::Z, angle));
+            let random_stuff = ((i + j) % 4) as f32;
+            let angle = random_stuff * std::f32::consts::PI / 2.0;
+            let transform = Transform::from_translation(
+                start_position + Vec3::new((i * size) as f32, (j * size) as f32, 0.0),
+            )
+            .with_rotation(Quat::from_axis_angle(Vec3::Z, angle));
             commands.spawn_bundle(SpriteBundle {
                 texture: bg.clone(),
                 transform,
@@ -41,10 +43,7 @@ fn display_background(
     }
 }
 
-fn display_title(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
+fn display_title(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn_bundle(
         TextBundle::from_section(
             "Combinatorica",
