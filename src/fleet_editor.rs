@@ -1,3 +1,4 @@
+use crate::Overflow::Visible;
 use bevy::prelude::*;
 use bevy::render::render_resource::BindingType::Texture;
 use bevy::ui::FocusPolicy;
@@ -33,6 +34,7 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
             color: Color::NONE.into(),
             ..default()
         })
+        .insert(Screen(AppState::FleetEditor))
         .with_children(|screen| {
             screen
                 .spawn_bundle(NodeBundle {
@@ -75,6 +77,9 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                                                 ..default()
                                             },
                                             color: Color::ALICE_BLUE.into(),
+                                            visibility: Visibility {
+                                                is_visible: index <= fleet.0.len(),
+                                            },
                                             ..default()
                                         })
                                         .insert(ShipIndex(index))
@@ -106,7 +111,7 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                                                         TextAlignment::BOTTOM_CENTER,
                                                     ),
                                                 );
-                                            } else {
+                                            } else if index == fleet.0.len() {
                                                 button.spawn_bundle(
                                                     TextBundle::from_section(
                                                         "+",
@@ -142,8 +147,7 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                         )
                         .insert(RightSide);
                 });
-        })
-        .insert(Screen(AppState::MainMenu));
+        });
 }
 
 fn activate_ships(
