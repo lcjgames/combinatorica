@@ -19,7 +19,7 @@ impl Plugin for FleetEditor {
 }
 
 #[derive(Component)]
-struct StrengthText;
+struct RightSide;
 
 fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Res<Fleet>) {
     let n_columns = 3;
@@ -129,6 +129,7 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                 .spawn_bundle(NodeBundle {
                     style: Style {
                         size: Size::new(Val::Percent(70.0), Val::Percent(100.0)),
+                        flex_direction: FlexDirection::ColumnReverse,
                         ..default()
                     },
                     color: Color::NONE.into(),
@@ -139,7 +140,7 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                         .spawn_bundle(
                             TextBundle::default().with_text_alignment(TextAlignment::CENTER_LEFT),
                         )
-                        .insert(StrengthText);
+                        .insert(RightSide);
                 });
         })
         .insert(Screen(AppState::MainMenu));
@@ -187,17 +188,20 @@ fn activate_ships(
 
 fn update_strength(
     asset_server: Res<AssetServer>,
-    mut query: Query<&mut Text, With<StrengthText>>,
+    mut query: Query<&mut Text, With<RightSide>>,
     fleet: Res<Fleet>,
 ) {
-    for mut text in query.iter_mut() {
-        *text = Text::from_section(
-            format!("Strength: {}", fleet.strength()),
-            TextStyle {
-                font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
-                font_size: 75.0,
-                color: Color::GRAY,
-            },
-        );
-    }
+    let mut text = query.single_mut();
+    *text = Text::from_sections([TextSection::new(
+        format!(
+            "Fleet Information\nStrength: {}\nCombinations: {}\n",
+            fleet.strength(),
+            fleet.combination_bonus()
+        ),
+        TextStyle {
+            font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+            font_size: 60.0,
+            color: Color::GRAY,
+        },
+    )]);
 }

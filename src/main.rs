@@ -3,6 +3,8 @@ use bevy::prelude::*;
 mod camera;
 use camera::*;
 
+mod combinatorics;
+
 mod fleet_editor;
 use fleet_editor::*;
 
