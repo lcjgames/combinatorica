@@ -21,6 +21,9 @@ use main_menu::*;
 mod movement;
 use movement::*;
 
+mod ship;
+use ship::*;
+
 mod sprites;
 use sprites::*;
 
@@ -123,6 +126,7 @@ fn main() {
         .add_plugin(FleetEditor)
         .add_plugin(Loading)
         .add_plugin(MainMenu)
+        .add_plugin(ShipPlugin)
         .add_startup_system(spawn_main_camera)
         .add_startup_system(display_background)
         .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn))
@@ -153,13 +157,12 @@ fn display_background(
             let transform = Transform::from_translation(
                 start_position + Vec3::new((i * size) as f32, (j * size) as f32, 0.0),
             )
-                .with_rotation(Quat::from_axis_angle(Vec3::Z, angle));
-            commands
-                .spawn_bundle(SpriteBundle {
-                    texture: bg.clone(),
-                    transform,
-                    ..default()
-                });
+            .with_rotation(Quat::from_axis_angle(Vec3::Z, angle));
+            commands.spawn_bundle(SpriteBundle {
+                texture: bg.clone(),
+                transform,
+                ..default()
+            });
         }
     }
 }

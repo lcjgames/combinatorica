@@ -7,8 +7,7 @@ pub struct MainMenu;
 
 impl Plugin for MainMenu {
     fn build(&self, app: &mut App) {
-        app
-            .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_title))
+        app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_title))
             .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(display_buttons))
             .add_system_set(SystemSet::on_update(AppState::MainMenu).with_system(activate_buttons))
             .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(screen_cleanup));
