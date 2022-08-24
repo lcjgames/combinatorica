@@ -1,5 +1,8 @@
 use bevy::prelude::*;
 
+mod battle;
+use battle::*;
+
 mod camera;
 use camera::*;
 
@@ -125,16 +128,13 @@ fn main() {
     console_log!("Starting Game!");
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugin(Battle)
         .add_plugin(FleetEditor)
         .add_plugin(Loading)
         .add_plugin(MainMenu)
         .add_plugin(ShipPlugin)
         .add_startup_system(spawn_main_camera)
         .add_startup_system(display_background)
-        .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn))
-        .add_system_set(SystemSet::on_update(AppState::Battle).with_system(animate_sprite))
-        .add_system_set(SystemSet::on_update(AppState::Battle).with_system(input_handling))
-        .add_system_set(SystemSet::on_update(AppState::Battle).with_system(movement))
         .run();
 }
 
