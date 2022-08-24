@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-use crate::camera::MainCamera;
 use crate::state::*;
 
 pub struct MainMenu;

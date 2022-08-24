@@ -1,6 +1,4 @@
-use crate::Overflow::Visible;
 use bevy::prelude::*;
-use bevy::render::render_resource::BindingType::Texture;
 use bevy::ui::FocusPolicy;
 
 use crate::ship::*;
@@ -252,7 +250,7 @@ fn go_button_interaction(
 
 fn go_button_activation(
     mut button_query: Query<&mut Visibility, (With<Button>, With<GoButton>)>,
-    mut fleet: ResMut<Fleet>,
+    fleet: ResMut<Fleet>,
 ) {
     for mut visibility in button_query.iter_mut() {
         *visibility = Visibility {
