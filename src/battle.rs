@@ -43,6 +43,7 @@ fn spawn_target(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn_bundle(SpriteBundle {
             texture: asset_server.load("spaceshooter/PNG/UI/cursor.png"), // TODO: move to loading
+            transform: Transform::from_translation(Vec3::Z),
             ..default()
         })
         .insert(ShipTarget);
@@ -53,7 +54,8 @@ fn spawn_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Re
         commands
             .spawn_bundle(SpriteBundle {
                 texture: asset_server.load(ship.parts.whole_ship),
-                transform: Transform::from_translation(Vec3::Z).with_scale(Vec3::splat(0.3)),
+                transform: Transform::from_translation(Vec3::new((10 * index) as f32, 0.0, 1.0))
+                    .with_scale(Vec3::splat(0.3)),
                 ..default()
             })
             .insert(ShipMarker)
@@ -84,9 +86,8 @@ fn target_force(
     for (ship_transform, mut force) in ship_query.iter_mut() {
         force.target_attraction_force = {
             let direction = target_transform.translation - ship_transform.translation;
-            direction * 5.0
+            1_000.0 * direction.normalize()
         };
-        crate::log::console_log!("target attraction force: {}", force.target_attraction_force);
     }
 }
 
@@ -100,15 +101,20 @@ fn boid_forces(mut query: Query<(&Transform, &mut ShipForce), With<ShipMarker>>)
         let separation_force = {
             let direction = transform_1.translation - transform_2.translation;
             let distance = direction.length();
-            let distance = if distance > 0.01 { distance } else { 0.01 };
-            direction / distance.powf(3.0)
+            let factor = if distance > 200.0 {
+                -100.0
+            } else if distance > 100.0 {
+                0.0
+            } else if distance > 10.0 {
+                100.0
+            } else {
+                1_000.0
+            };
+            factor * direction.normalize()
         };
-        crate::log::console_log!("separation force: {}", separation_force);
+        crate::log::console_log!("separation force: {}", separation_force); //removing this log breaks everything
         force_1.separation_force += separation_force;
         force_2.separation_force -= separation_force;
-        let cohesion_force = {
-            Vec3::ZERO //TODO
-        };
     }
 }
 
@@ -119,11 +125,8 @@ fn steer_ships(
     let dt = time.delta_seconds();
     for (mut transform, mut velocity, force) in query.iter_mut() {
         let resultant_force = force.resultant();
-        crate::log::console_log!("total force: {}", resultant_force);
         transform.rotation = Quat::from_rotation_arc(Vec3::Y, resultant_force.normalize());
-        velocity.0 += resultant_force * 70.0 * dt;
-        crate::log::console_log!("velocity: {}", velocity.0);
+        velocity.0 += resultant_force / 70.0 * dt;
         transform.translation += velocity.0 * dt;
-        crate::log::console_log!("position: {}", transform.translation);
     }
 }
