@@ -11,7 +11,7 @@ impl Plugin for Battle {
             .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn_ships))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(update_target))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(target_force))
-            .add_system_set(SystemSet::on_update(AppState::Battle).with_system(boid_forces))
+            .add_system_set(SystemSet::on_update(AppState::Battle).with_system(ship_forces))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(steer_ships))
             .add_system_set(SystemSet::on_exit(AppState::Battle).with_system(screen_cleanup));
     }
@@ -26,8 +26,7 @@ struct ShipMarker;
 #[derive(Component, Default)]
 struct ShipForce {
     target_attraction_force: Vec3,
-    separation_force: Vec3,
-    cohesion_force: Vec3,
+    ship_interaction_force: Vec3,
 }
 
 #[derive(Component, Default)]
@@ -35,7 +34,9 @@ struct Velocity(Vec3);
 
 impl ShipForce {
     fn resultant(&self) -> Vec3 {
-        self.target_attraction_force + self.separation_force + self.cohesion_force
+        let mut resultant = self.target_attraction_force + self.ship_interaction_force;
+        resultant.z = 0.0;
+        resultant
     }
 }
 
@@ -54,7 +55,7 @@ fn spawn_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Re
         commands
             .spawn_bundle(SpriteBundle {
                 texture: asset_server.load(ship.parts.whole_ship),
-                transform: Transform::from_translation(Vec3::new((10 * index) as f32, 0.0, 1.0))
+                transform: Transform::from_translation(Vec3::new((20 * index) as f32, 0.0, 1.0))
                     .with_scale(Vec3::splat(0.3)),
                 ..default()
             })
@@ -91,10 +92,9 @@ fn target_force(
     }
 }
 
-fn boid_forces(mut query: Query<(&Transform, &mut ShipForce), With<ShipMarker>>) {
+fn ship_forces(mut query: Query<(&Transform, &mut ShipForce), With<ShipMarker>>) {
     for (_, mut force) in query.iter_mut() {
-        force.separation_force = Vec3::ZERO;
-        force.cohesion_force = Vec3::ZERO;
+        force.ship_interaction_force = Vec3::ZERO;
     }
     let mut iter = query.iter_combinations_mut();
     while let Some([(transform_1, mut force_1), (transform_2, mut force_2)]) = iter.fetch_next() {
@@ -103,18 +103,18 @@ fn boid_forces(mut query: Query<(&Transform, &mut ShipForce), With<ShipMarker>>)
             let distance = direction.length();
             let factor = if distance > 200.0 {
                 -100.0
-            } else if distance > 100.0 {
+            } else if distance > 50.0 {
                 0.0
             } else if distance > 10.0 {
-                100.0
-            } else {
                 1_000.0
+            } else {
+                10_000.0
             };
             factor * direction.normalize()
         };
-        crate::log::console_log!("separation force: {}", separation_force); //removing this log breaks everything
-        force_1.separation_force += separation_force;
-        force_2.separation_force -= separation_force;
+        crate::log::console_log!("removing this log breaks everything");
+        force_1.ship_interaction_force += separation_force;
+        force_2.ship_interaction_force -= separation_force;
     }
 }
 
