@@ -27,9 +27,11 @@ impl Plugin for Battle {
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(despawn_laser))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(despawn_meteor))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(destroy_ships))
+            .add_system_set(SystemSet::on_update(AppState::Battle).with_system(exit_no_ship))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(exit_timer))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(exit_buttons))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(show_all))
+            .add_system_set(SystemSet::on_exit(AppState::Battle).with_system(update_fleet))
             .add_system_set(SystemSet::on_exit(AppState::Battle).with_system(screen_cleanup));
     }
 }
@@ -133,8 +135,8 @@ fn spawn_meteor_spawner(mut commands: Commands) {
         .spawn()
         .insert(MeteorSpawner {
             timer: Timer::from_seconds(2.0, true),
-            spawn_radius: 1000.0,
-            target_radius: 500.0,
+            spawn_radius: 700.0,
+            target_radius: 300.0,
         })
         .insert(Screen(AppState::Battle));
 }
@@ -142,13 +144,15 @@ fn spawn_meteor_spawner(mut commands: Commands) {
 fn spawn_exit_timer(mut commands: Commands) {
     commands
         .spawn()
-        .insert(ExitTimer(Timer::from_seconds(60.0, false)));
+        .insert(ExitTimer(Timer::from_seconds(60.0, false)))
+        .insert(Screen(AppState::Battle));
 }
 
 fn spawn_that_text_on_the_screen(mut commands: Commands) {
     commands
         .spawn_bundle(TextBundle::default().with_text_alignment(TextAlignment::CENTER_LEFT))
-        .insert(ThatTextOnTheScreen);
+        .insert(ThatTextOnTheScreen)
+        .insert(Screen(AppState::Battle));
 }
 
 fn update_that_text_on_the_screen(
@@ -160,7 +164,7 @@ fn update_that_text_on_the_screen(
     let timer = timer_query.single();
     *text = Text::from_sections([TextSection::new(
         format!(
-            "Time left: {:.2}",
+            "Time left: {:.2}\n(Press Esc to exit)",
             (timer.0.duration() - timer.0.elapsed()).as_secs_f32()
         ),
         TextStyle {
@@ -284,7 +288,7 @@ fn despawn_meteor(mut commands: Commands, query: Query<(Entity, &Transform), Wit
             transform.translation,
             transform.translation.length()
         );
-        if transform.translation.length() > 1100.0 {
+        if transform.translation.length() > 1000.0 {
             commands.entity(entity).despawn_recursive();
         }
     }
@@ -351,16 +355,24 @@ fn movement(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
 
 fn destroy_ships(
     mut commands: Commands,
-    ship_query: Query<(Entity, &Transform, &HitBox), With<ShipMarker>>,
+    ship_query: Query<(Entity, &Transform, &HitBox, &ShipIndex), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
+    mut fleet: ResMut<Fleet>,
 ) {
-    for (ship_entity, ship_transform, ship_hitbox) in ship_query.iter() {
+    for (ship_entity, ship_transform, ship_hitbox, ship_index) in ship_query.iter() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
             let distance = (ship_transform.translation - meteor_transform.translation).length();
             if distance < ship_hitbox.radius + meteor_hitbox.radius {
                 commands.entity(ship_entity).despawn_recursive();
+                fleet.0[ship_index.0].destroyed = true;
             }
         }
+    }
+}
+
+fn exit_no_ship(mut state: ResMut<State<AppState>>, query: Query<(), With<ShipMarker>>) {
+    if query.is_empty() {
+        state.set(AppState::FleetEditor).unwrap();
     }
 }
 
@@ -388,4 +400,13 @@ fn show_all(input: Res<Input<KeyCode>>, mut query: Query<&mut Visibility>) {
             visibility.is_visible = true;
         }
     }
+}
+
+fn update_fleet(mut fleet: ResMut<Fleet>) {
+    fleet.0 = fleet
+        .0
+        .clone()
+        .into_iter()
+        .filter(|ship| !ship.destroyed)
+        .collect();
 }

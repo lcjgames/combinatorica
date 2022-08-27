@@ -7,6 +7,7 @@ pub enum AppState {
     FleetEditor,
     ShipEditor,
     Battle,
+    Shop,
 }
 
 #[derive(Component)]

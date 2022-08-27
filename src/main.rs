@@ -23,6 +23,9 @@ use main_menu::*;
 mod ship;
 use ship::*;
 
+mod shop;
+use shop::*;
+
 mod state;
 use state::*;
 
@@ -40,6 +43,7 @@ fn main() {
         // .add_plugin(Loading)
         .add_plugin(MainMenu)
         .add_plugin(ShipPlugin)
+        .add_plugin(Shop)
         .add_startup_system(spawn_main_camera)
         .add_startup_system(display_background)
         .run();
