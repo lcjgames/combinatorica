@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::ui::FocusPolicy;
 
 use crate::parts::*;
+use crate::ship::*;
 use crate::state::*;
 
 pub struct ShipEditor;
@@ -343,13 +344,52 @@ fn ok_button(
         (&Interaction, &mut UiColor),
         (Changed<Interaction>, With<Button>, With<OkButton>),
     >,
+    mut ship: ResMut<BuildingShip>,
+    mut owned_parts: ResMut<OwnedParts>,
+    mut fleet: ResMut<Fleet>,
 ) {
     for (interaction, mut color) in button_query.iter_mut() {
         *color = match *interaction {
             Interaction::Hovered => Color::GRAY.into(),
             Interaction::None => Color::ALICE_BLUE.into(),
             Interaction::Clicked => {
-                // TODO: remove parts and add ship
+                owned_parts.cockpit = owned_parts
+                    .cockpit
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| i != &ship.cockpit_index)
+                    .map(|(_, x)| x.clone())
+                    .collect();
+                owned_parts.engine = owned_parts
+                    .engine
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| i != &ship.engine_index)
+                    .map(|(_, x)| x.clone())
+                    .collect();
+                owned_parts.wings = owned_parts
+                    .wings
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| i != &ship.wings_index)
+                    .map(|(_, x)| x.clone())
+                    .collect();
+                owned_parts.lasergun = owned_parts
+                    .lasergun
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| i != &ship.lasergun_index)
+                    .map(|(_, x)| x.clone())
+                    .collect();
+                fleet.0.push(Ship {
+                    parts: crate::ship::Parts {
+                        whole_ship: "spaceshooter/PNG/playerShip1_orange.png",
+                    },
+                    strength: Strength(50.0),
+                    active: false,
+                    destroyed: false,
+                });
+                *ship = BuildingShip::default();
                 state.set(AppState::FleetEditor).unwrap();
                 Color::GREEN.into()
             }

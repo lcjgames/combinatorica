@@ -10,6 +10,7 @@ impl Plugin for Parts {
 }
 
 //TODO: #[derive(Default)]
+#[derive(Clone)]
 pub struct OwnedParts {
     pub cockpit: Vec<Cockpit>,
     pub engine: Vec<Engine>,
@@ -121,28 +122,33 @@ impl BuildingShip {
     }
 }
 
+#[derive(Clone)]
 pub struct Cockpit {
     style: CockpitStyle,
     color: PartColor,
     //TODO: bonuses
 }
 
+#[derive(Clone)]
 pub struct Engine {
     style: EngineStyle,
     //TODO: bonuses
 }
 
+#[derive(Clone)]
 pub struct Wings {
     style: WingsStyle,
     color: PartColor,
     //TODO: bonuses
 }
 
+#[derive(Clone)]
 pub struct LaserGun {
     style: LaserGunStyle,
     //TODO: bonuses
 }
 
+#[derive(Clone)]
 enum PartColor {
     BLUE,
     GREEN,
@@ -161,6 +167,7 @@ impl PartColor {
     }
 }
 
+#[derive(Clone)]
 enum CockpitStyle {
     TYPE0,
     TYPE1,
@@ -187,6 +194,7 @@ impl CockpitStyle {
     }
 }
 
+#[derive(Clone)]
 enum EngineStyle {
     TYPE1,
     TYPE2,
@@ -207,6 +215,7 @@ impl EngineStyle {
     }
 }
 
+#[derive(Clone)]
 enum WingsStyle {
     TYPE0,
     TYPE1,
@@ -233,6 +242,7 @@ impl WingsStyle {
     }
 }
 
+#[derive(Clone)]
 enum LaserGunStyle {
     TYPE0,
     TYPE1,
