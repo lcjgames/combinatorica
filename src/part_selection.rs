@@ -76,7 +76,7 @@ fn display_parts(
                                 size: Size::new(Val::Percent(70.0), Val::Percent(100.0)),
                                 ..default()
                             },
-                            color: Color::GREEN.into(),
+                            color: Color::NONE.into(),
                             ..default()
                         })
                         .with_children(|left_side| {
@@ -188,7 +188,7 @@ fn part_button_interaction(
         (Changed<Interaction>, With<Button>),
     >,
     owned_parts: Res<OwnedParts>,
-    mut ship: Res<BuildingShip>,
+    mut ship: ResMut<BuildingShip>,
     mut query: Query<&mut Text, With<DescriptionText>>,
 ) {
     for (interaction, mut color, part_index) in button_query.iter_mut() {
@@ -210,7 +210,7 @@ fn part_button_interaction(
             }
             Interaction::None => Color::ALICE_BLUE.into(),
             Interaction::Clicked => {
-                //TODO update correct part
+                ship.set(part_index.0, part_index.1);
                 state.set(AppState::ShipEditor).unwrap();
                 Color::GREEN.into()
             }

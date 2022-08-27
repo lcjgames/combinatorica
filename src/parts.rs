@@ -35,7 +35,10 @@ impl Default for OwnedParts {
                     style: EngineStyle::TYPE5,
                 },
             ],
-            wings: Vec::new(),
+            wings: vec![Wings {
+                style: WingsStyle::TYPE3,
+                color: PartColor::RED,
+            }],
             lasergun: vec![
                 LaserGun {
                     style: LaserGunStyle::TYPE0,
@@ -101,10 +104,21 @@ impl OwnedParts {
 
 #[derive(Default)]
 pub struct BuildingShip {
-    cockpit: Option<Cockpit>,
-    engine: Option<Engine>,
-    wings: Option<Wings>,
-    lasergun: Option<LaserGun>,
+    pub cockpit_index: usize,
+    pub engine_index: usize,
+    pub wings_index: usize,
+    pub lasergun_index: usize,
+}
+
+impl BuildingShip {
+    pub fn set(&mut self, part_type: PartType, index: usize) {
+        match part_type {
+            PartType::Cockpit => self.cockpit_index = index,
+            PartType::Engine => self.engine_index = index,
+            PartType::Wings => self.wings_index = index,
+            PartType::Lasergun => self.lasergun_index = index,
+        }
+    }
 }
 
 pub struct Cockpit {

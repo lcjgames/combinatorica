@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::ui::FocusPolicy;
 
 use crate::parts::*;
 use crate::state::*;
@@ -10,6 +11,7 @@ impl Plugin for ShipEditor {
         app.add_event::<PartSelectionEvent>()
             .add_system_set(SystemSet::on_enter(AppState::ShipEditor).with_system(display))
             .add_system_set(SystemSet::on_update(AppState::ShipEditor).with_system(cancel_button))
+            .add_system_set(SystemSet::on_update(AppState::ShipEditor).with_system(ok_button))
             .add_system_set(SystemSet::on_update(AppState::ShipEditor).with_system(choose_button))
             .add_system_set(SystemSet::on_exit(AppState::ShipEditor).with_system(screen_cleanup));
     }
@@ -27,7 +29,12 @@ struct ChooseButton(PartType);
 #[derive(Component)]
 struct ChosenPart(PartType);
 
-fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn display(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    ship: Res<BuildingShip>,
+    owned_parts: Res<OwnedParts>,
+) {
     commands
         .spawn_bundle(NodeBundle {
             style: Style {
@@ -68,7 +75,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 size: Size::new(Val::Percent(70.0), Val::Percent(100.0)),
                                 ..default()
                             },
-                            color: Color::GREEN.into(),
+                            color: Color::NONE.into(),
                             ..default()
                         })
                         .with_children(|right_side| {
@@ -93,7 +100,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                                 flex_direction: FlexDirection::Column,
                                                 ..default()
                                             },
-                                            color: Color::RED.into(),
+                                            color: Color::NONE.into(),
                                             ..default()
                                         })
                                         .with_children(|cockpit_node| {
@@ -101,6 +108,10 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                                 cockpit_node,
                                                 PartType::Cockpit,
                                                 &asset_server,
+                                                &owned_parts.get_image(
+                                                    PartType::Cockpit,
+                                                    ship.cockpit_index,
+                                                ),
                                             );
                                         });
                                     first_column
@@ -113,7 +124,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                                 flex_direction: FlexDirection::Column,
                                                 ..default()
                                             },
-                                            color: Color::RED.into(),
+                                            color: Color::NONE.into(),
                                             ..default()
                                         })
                                         .with_children(|wings_node| {
@@ -121,6 +132,8 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                                 wings_node,
                                                 PartType::Wings,
                                                 &asset_server,
+                                                &owned_parts
+                                                    .get_image(PartType::Wings, ship.wings_index),
                                             );
                                         });
                                 });
@@ -145,7 +158,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                                 flex_direction: FlexDirection::Column,
                                                 ..default()
                                             },
-                                            color: Color::RED.into(),
+                                            color: Color::NONE.into(),
                                             ..default()
                                         })
                                         .with_children(|engine_node| {
@@ -153,6 +166,8 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                                 engine_node,
                                                 PartType::Engine,
                                                 &asset_server,
+                                                &owned_parts
+                                                    .get_image(PartType::Engine, ship.engine_index),
                                             );
                                         });
                                     second_column
@@ -165,7 +180,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                                 flex_direction: FlexDirection::Column,
                                                 ..default()
                                             },
-                                            color: Color::RED.into(),
+                                            color: Color::NONE.into(),
                                             ..default()
                                         })
                                         .with_children(|lasergun_node| {
@@ -173,6 +188,10 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                                 lasergun_node,
                                                 PartType::Lasergun,
                                                 &asset_server,
+                                                &owned_parts.get_image(
+                                                    PartType::Lasergun,
+                                                    ship.lasergun_index,
+                                                ),
                                             );
                                         });
                                 });
@@ -220,6 +239,38 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 .with_text_alignment(TextAlignment::CENTER),
                             );
                         });
+                    lower_screen
+                        .spawn_bundle(ButtonBundle {
+                            style: Style {
+                                size: Size::new(Val::Px(150.0), Val::Px(75.0)),
+                                margin: UiRect::new(
+                                    Val::Percent(10.0),
+                                    Val::Auto,
+                                    Val::Auto,
+                                    Val::Percent(10.0),
+                                ),
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                flex_direction: FlexDirection::ColumnReverse,
+                                ..default()
+                            },
+                            color: Color::ALICE_BLUE.into(),
+                            ..default()
+                        })
+                        .insert(OkButton)
+                        .with_children(|button| {
+                            button.spawn_bundle(
+                                TextBundle::from_section(
+                                    "Create",
+                                    TextStyle {
+                                        font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                                        font_size: 30.0,
+                                        color: Color::DARK_GRAY,
+                                    },
+                                )
+                                .with_text_alignment(TextAlignment::CENTER),
+                            );
+                        });
                 });
         });
 }
@@ -228,6 +279,7 @@ fn spawn_choose_button(
     node: &mut ChildBuilder,
     part_type: PartType,
     asset_server: &Res<AssetServer>,
+    image: &String,
 ) {
     node.spawn_bundle(ButtonBundle {
         style: Style {
@@ -243,13 +295,13 @@ fn spawn_choose_button(
     })
     .insert(ChooseButton(part_type))
     .with_children(|button| {
-        button.spawn_bundle(NodeBundle {
+        button.spawn_bundle(ImageBundle {
+            image: asset_server.load(image).into(),
             style: Style {
-                size: Size::new(Val::Percent(100.0), Val::Percent(80.0)),
-                flex_direction: FlexDirection::ColumnReverse,
+                size: Size::new(Val::Auto, Val::Percent(80.0)),
                 ..default()
             },
-            color: Color::BLUE.into(),
+            focus_policy: FocusPolicy::Pass,
             ..default()
         });
         button.spawn_bundle(
@@ -278,6 +330,26 @@ fn cancel_button(
             Interaction::Hovered => Color::GRAY.into(),
             Interaction::None => Color::ALICE_BLUE.into(),
             Interaction::Clicked => {
+                state.set(AppState::FleetEditor).unwrap();
+                Color::GREEN.into()
+            }
+        }
+    }
+}
+
+fn ok_button(
+    mut state: ResMut<State<AppState>>,
+    mut button_query: Query<
+        (&Interaction, &mut UiColor),
+        (Changed<Interaction>, With<Button>, With<OkButton>),
+    >,
+) {
+    for (interaction, mut color) in button_query.iter_mut() {
+        *color = match *interaction {
+            Interaction::Hovered => Color::GRAY.into(),
+            Interaction::None => Color::ALICE_BLUE.into(),
+            Interaction::Clicked => {
+                // TODO: remove parts and add ship
                 state.set(AppState::FleetEditor).unwrap();
                 Color::GREEN.into()
             }
