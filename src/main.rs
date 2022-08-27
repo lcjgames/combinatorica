@@ -1,3 +1,5 @@
+extern crate core;
+
 use bevy::prelude::*;
 
 mod battle;
@@ -20,8 +22,17 @@ mod log;
 mod main_menu;
 use main_menu::*;
 
+mod part_selection;
+use part_selection::*;
+
+mod parts;
+use parts::*;
+
 mod ship;
 use ship::*;
+
+mod ship_editor;
+use ship_editor::*;
 
 mod shop;
 use shop::*;
@@ -42,6 +53,9 @@ fn main() {
         .add_plugin(FleetEditor)
         // .add_plugin(Loading)
         .add_plugin(MainMenu)
+        .add_plugin(PartSelection)
+        .add_plugin(Parts)
+        .add_plugin(ShipEditor)
         .add_plugin(ShipPlugin)
         .add_plugin(Shop)
         .add_startup_system(spawn_main_camera)

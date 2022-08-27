@@ -5,6 +5,7 @@ pub enum AppState {
     // Loading,
     MainMenu,
     FleetEditor,
+    PartSelection,
     ShipEditor,
     Battle,
     Shop,
