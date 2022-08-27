@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::parts::*;
 use crate::state::*;
 
 pub struct ShipEditor;
@@ -10,7 +11,12 @@ impl Plugin for ShipEditor {
     }
 }
 
-fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn display(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut ship: ResMut<BuildingShip>,
+    parts: Res<OwnedParts>,
+) {
     commands
         .spawn_bundle(NodeBundle {
             style: Style {

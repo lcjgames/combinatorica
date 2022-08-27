@@ -10,7 +10,7 @@ impl Plugin for Parts {
 }
 
 //TODO: #[derive(Default)]
-struct OwnedParts {
+pub struct OwnedParts {
     cockpit: Vec<Cockpit>,
     engine: Vec<Engine>,
     wings: Vec<Wings>,
@@ -49,7 +49,7 @@ impl Default for OwnedParts {
 }
 
 #[derive(Default)]
-struct BuildingShip {
+pub struct BuildingShip {
     cockpit: Option<Cockpit>,
     engine: Option<Engine>,
     wings: Option<Wings>,

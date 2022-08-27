@@ -283,11 +283,6 @@ fn despawn_laser(mut commands: Commands, time: Res<Time>, mut query: Query<(Enti
 
 fn despawn_meteor(mut commands: Commands, query: Query<(Entity, &Transform), With<Meteor>>) {
     for (entity, transform) in query.iter() {
-        crate::log::console_log!(
-            "position {} length {}",
-            transform.translation,
-            transform.translation.length()
-        );
         if transform.translation.length() > 1000.0 {
             commands.entity(entity).despawn_recursive();
         }
