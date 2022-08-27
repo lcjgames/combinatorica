@@ -103,7 +103,7 @@ fn spawn_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Re
     for (index, ship) in fleet.0.iter().enumerate().filter(|(_, ship)| ship.active) {
         commands
             .spawn_bundle(SpriteBundle {
-                texture: asset_server.load(ship.parts.whole_ship),
+                texture: asset_server.load(ship.cockpit_sprite.as_str()), //TODO: add wings
                 transform: Transform::from_translation(Vec3::new((20 * index) as f32, 0.0, 1.0))
                     .with_scale(Vec3::splat(0.3)),
                 ..default()

@@ -12,16 +12,12 @@ impl Plugin for ShipPlugin {
 pub struct ShipIndex(pub usize);
 
 #[derive(Clone)]
-pub struct Parts {
-    pub whole_ship: &'static str, // TODO: divide this into parts
-}
-
-#[derive(Clone)]
 pub struct Strength(pub f32);
 
 #[derive(Clone)]
 pub struct Ship {
-    pub parts: Parts,
+    pub wings_sprite: String,
+    pub cockpit_sprite: String,
     pub strength: Strength,
     pub active: bool,
     pub destroyed: bool,
@@ -31,32 +27,13 @@ pub struct Fleet(pub Vec<Ship>);
 
 impl Default for Fleet {
     fn default() -> Self {
-        Fleet(vec![
-            Ship {
-                parts: Parts {
-                    whole_ship: "spaceshooter/PNG/playerShip1_blue.png", // TODO: use consts
-                },
-                strength: Strength(42.0),
-                active: false,
-                destroyed: false,
-            },
-            Ship {
-                parts: Parts {
-                    whole_ship: "spaceshooter/PNG/playerShip2_green.png",
-                },
-                strength: Strength(78.1),
-                active: false,
-                destroyed: false,
-            },
-            Ship {
-                parts: Parts {
-                    whole_ship: "spaceshooter/PNG/playerShip3_orange.png",
-                },
-                strength: Strength(55.3),
-                active: false,
-                destroyed: false,
-            },
-        ])
+        Fleet(vec![Ship {
+            wings_sprite: "spaceshooter/PNG/Parts/wingBlue_0.png".to_string(),
+            cockpit_sprite: "spaceshooter/PNG/Parts/cockpitBlue_0.png".to_string(),
+            strength: Strength(42.0),
+            active: false,
+            destroyed: false,
+        }])
     }
 }
 

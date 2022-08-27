@@ -96,7 +96,7 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                                                 let ship = &fleet.0[index];
                                                 button.spawn_bundle(ImageBundle {
                                                     image: asset_server
-                                                        .load(ship.parts.whole_ship)
+                                                        .load(ship.wings_sprite.as_str()) //TODO: add cockpit
                                                         .into(),
                                                     style: Style {
                                                         size: Size::new(Val::Auto, Val::Px(50.0)),
