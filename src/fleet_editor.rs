@@ -1,6 +1,4 @@
-use crate::Overflow::Visible;
 use bevy::prelude::*;
-use bevy::render::render_resource::BindingType::Texture;
 use bevy::ui::FocusPolicy;
 
 use crate::ship::*;
@@ -13,6 +11,12 @@ impl Plugin for FleetEditor {
         app.add_system_set(SystemSet::on_enter(AppState::FleetEditor).with_system(display_ships))
             .add_system_set(SystemSet::on_update(AppState::FleetEditor).with_system(activate_ships))
             .add_system_set(
+                SystemSet::on_update(AppState::FleetEditor).with_system(go_button_interaction),
+            )
+            .add_system_set(
+                SystemSet::on_update(AppState::FleetEditor).with_system(go_button_activation),
+            )
+            .add_system_set(
                 SystemSet::on_update(AppState::FleetEditor).with_system(update_strength),
             )
             .add_system_set(SystemSet::on_exit(AppState::FleetEditor).with_system(screen_cleanup));
@@ -21,6 +25,9 @@ impl Plugin for FleetEditor {
 
 #[derive(Component)]
 struct RightSide;
+
+#[derive(Component)]
+struct GoButton;
 
 fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Res<Fleet>) {
     let n_columns = 3;
@@ -146,6 +153,38 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                             TextBundle::default().with_text_alignment(TextAlignment::CENTER_LEFT),
                         )
                         .insert(RightSide);
+                    right_side
+                        .spawn_bundle(ButtonBundle {
+                            style: Style {
+                                size: Size::new(Val::Px(75.0), Val::Px(75.0)),
+                                margin: UiRect::new(
+                                    Val::Percent(10.0),
+                                    Val::Auto,
+                                    Val::Auto,
+                                    Val::Percent(10.0),
+                                ),
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                flex_direction: FlexDirection::ColumnReverse,
+                                ..default()
+                            },
+                            color: Color::ALICE_BLUE.into(),
+                            ..default()
+                        })
+                        .insert(GoButton)
+                        .with_children(|button| {
+                            button.spawn_bundle(
+                                TextBundle::from_section(
+                                    "Go!",
+                                    TextStyle {
+                                        font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                                        font_size: 30.0,
+                                        color: Color::DARK_GRAY,
+                                    },
+                                )
+                                .with_text_alignment(TextAlignment::CENTER),
+                            );
+                        });
                 });
         });
 }
@@ -186,6 +225,36 @@ fn activate_ships(
                     Color::GREEN.into()
                 }
             }
+        }
+    }
+}
+
+fn go_button_interaction(
+    mut state: ResMut<State<AppState>>,
+    mut button_query: Query<
+        (&Interaction, &mut UiColor),
+        (Changed<Interaction>, With<Button>, With<GoButton>),
+    >,
+) {
+    for (interaction, mut color) in button_query.iter_mut() {
+        *color = match *interaction {
+            Interaction::Hovered => Color::GRAY.into(),
+            Interaction::None => Color::ALICE_BLUE.into(),
+            Interaction::Clicked => {
+                state.set(AppState::Battle).unwrap();
+                Color::GREEN.into()
+            }
+        }
+    }
+}
+
+fn go_button_activation(
+    mut button_query: Query<&mut Visibility, (With<Button>, With<GoButton>)>,
+    fleet: ResMut<Fleet>,
+) {
+    for mut visibility in button_query.iter_mut() {
+        *visibility = Visibility {
+            is_visible: fleet.0.iter().any(|ship| ship.active),
         }
     }
 }

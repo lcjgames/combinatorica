@@ -2,11 +2,12 @@ use bevy::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AppState {
-    Loading,
+    // Loading,
     MainMenu,
     FleetEditor,
     ShipEditor,
     Battle,
+    Shop,
 }
 
 #[derive(Component)]

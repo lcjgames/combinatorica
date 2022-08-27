@@ -1,7 +1,5 @@
 use bevy::prelude::*;
 
-use std::ops::Add;
-
 pub struct ShipPlugin;
 
 impl Plugin for ShipPlugin {
@@ -13,16 +11,20 @@ impl Plugin for ShipPlugin {
 #[derive(Component)]
 pub struct ShipIndex(pub usize);
 
+#[derive(Clone)]
 pub struct Parts {
     pub whole_ship: &'static str, // TODO: divide this into parts
 }
 
+#[derive(Clone)]
 pub struct Strength(pub f32);
 
+#[derive(Clone)]
 pub struct Ship {
     pub parts: Parts,
     pub strength: Strength,
     pub active: bool,
+    pub destroyed: bool,
 }
 
 pub struct Fleet(pub Vec<Ship>);
@@ -36,6 +38,7 @@ impl Default for Fleet {
                 },
                 strength: Strength(42.0),
                 active: false,
+                destroyed: false,
             },
             Ship {
                 parts: Parts {
@@ -43,6 +46,7 @@ impl Default for Fleet {
                 },
                 strength: Strength(78.1),
                 active: false,
+                destroyed: false,
             },
             Ship {
                 parts: Parts {
@@ -50,6 +54,7 @@ impl Default for Fleet {
                 },
                 strength: Strength(55.3),
                 active: false,
+                destroyed: false,
             },
         ])
     }

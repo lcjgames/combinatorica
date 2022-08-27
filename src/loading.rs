@@ -1,7 +1,5 @@
 use bevy::prelude::*;
-use bevy::render::render_resource::BindingType::Texture;
 
-use crate::sprites::{GroundTiles, SpriteSheets};
 use crate::state::AppState;
 
 pub struct Loading;
