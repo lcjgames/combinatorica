@@ -90,6 +90,13 @@ impl OwnedParts {
         //TODO
         "Description".to_string()
     }
+
+    pub fn at_least_one_each(&self) -> bool {
+        self.cockpit.len() > 0
+            && self.engine.len() > 0
+            && self.wings.len() > 0
+            && self.lasergun.len() > 0
+    }
 }
 
 #[derive(Default)]

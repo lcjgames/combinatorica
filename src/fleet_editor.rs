@@ -1,3 +1,4 @@
+use crate::OwnedParts;
 use bevy::prelude::*;
 use bevy::ui::FocusPolicy;
 
@@ -196,36 +197,46 @@ fn activate_ships(
         (Changed<Interaction>, With<Button>),
     >,
     mut fleet: ResMut<Fleet>,
+    owned_parts: Res<OwnedParts>,
 ) {
     for (interaction, ship_index, mut color) in button_query.iter_mut() {
-        let active = if ship_index.0 < fleet.0.len() {
-            fleet.0[ship_index.0].active
-        } else {
-            false
-        };
-        *color = if active {
+        *color = if ship_index.0 < fleet.0.len() {
+            let active = fleet.0[ship_index.0].active;
             match *interaction {
-                Interaction::Hovered => Color::DARK_GREEN.into(),
-                Interaction::None => Color::GREEN.into(),
+                Interaction::Hovered => {
+                    if active {
+                        Color::DARK_GREEN
+                    } else {
+                        Color::GRAY
+                    }
+                }
+                Interaction::None => {
+                    if active {
+                        Color::GREEN
+                    } else {
+                        Color::ALICE_BLUE
+                    }
+                }
                 Interaction::Clicked => {
-                    fleet.0[ship_index.0].active = false;
-                    Color::ALICE_BLUE.into()
+                    fleet.0[ship_index.0].active = !active;
+                    Color::ALICE_BLUE
                 }
             }
         } else {
-            match *interaction {
-                Interaction::Hovered => Color::GRAY.into(),
-                Interaction::None => Color::ALICE_BLUE.into(),
-                Interaction::Clicked => {
-                    if ship_index.0 < fleet.0.len() {
-                        fleet.0[ship_index.0].active = true;
-                    } else {
+            if owned_parts.at_least_one_each() {
+                match *interaction {
+                    Interaction::Hovered => Color::GRAY,
+                    Interaction::None => Color::ALICE_BLUE,
+                    Interaction::Clicked => {
                         state.set(AppState::ShipEditor).unwrap();
-                    };
-                    Color::GREEN.into()
+                        Color::GREEN
+                    }
                 }
+            } else {
+                Color::GRAY
             }
         }
+        .into();
     }
 }
 
