@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use rand::Rng;
 
 use crate::ship::*;
 use crate::state::*;
@@ -26,6 +25,7 @@ impl Plugin for Battle {
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(movement))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(spawn_laser))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(despawn_laser))
+            .add_system_set(SystemSet::on_update(AppState::Battle).with_system(despawn_meteor))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(destroy_ships))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(exit_timer))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(exit_buttons))
@@ -237,8 +237,8 @@ fn steer_ships(
 fn spawn_laser(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut ship_query: Query<&Transform, With<ShipMarker>>,
-    mut meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
+    ship_query: Query<&Transform, With<ShipMarker>>,
+    meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
 ) {
     for ship_transform in ship_query.iter() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
@@ -272,6 +272,19 @@ fn despawn_laser(mut commands: Commands, time: Res<Time>, mut query: Query<(Enti
     for (entity, mut laser) in query.iter_mut() {
         laser.timer.tick(time.delta());
         if laser.timer.finished() {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+fn despawn_meteor(mut commands: Commands, query: Query<(Entity, &Transform), With<Meteor>>) {
+    for (entity, transform) in query.iter() {
+        crate::log::console_log!(
+            "position {} length {}",
+            transform.translation,
+            transform.translation.length()
+        );
+        if transform.translation.length() > 1100.0 {
             commands.entity(entity).despawn_recursive();
         }
     }
@@ -338,8 +351,8 @@ fn movement(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
 
 fn destroy_ships(
     mut commands: Commands,
-    mut ship_query: Query<(Entity, &Transform, &HitBox), With<ShipMarker>>,
-    mut meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
+    ship_query: Query<(Entity, &Transform, &HitBox), With<ShipMarker>>,
+    meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
 ) {
     for (ship_entity, ship_transform, ship_hitbox) in ship_query.iter() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
