@@ -7,8 +7,10 @@ pub struct ShipEditor;
 
 impl Plugin for ShipEditor {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::ShipEditor).with_system(display))
+        app.add_event::<PartSelectionEvent>()
+            .add_system_set(SystemSet::on_enter(AppState::ShipEditor).with_system(display))
             .add_system_set(SystemSet::on_update(AppState::ShipEditor).with_system(cancel_button))
+            .add_system_set(SystemSet::on_update(AppState::ShipEditor).with_system(choose_button))
             .add_system_set(SystemSet::on_exit(AppState::ShipEditor).with_system(screen_cleanup));
     }
 }
@@ -20,13 +22,12 @@ struct CancelButton;
 struct OkButton;
 
 #[derive(Component)]
-struct ChooseButton;
+struct ChooseButton(PartType);
 
 #[derive(Component)]
-struct ChosenPart;
+struct ChosenPart(PartType);
 
 fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
-    crate::log::console_log!("SHIP EDITOR!");
     commands
         .spawn_bundle(NodeBundle {
             style: Style {
@@ -98,7 +99,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                         .with_children(|cockpit_node| {
                                             spawn_choose_button(
                                                 cockpit_node,
-                                                "Cockpit",
+                                                PartType::Cockpit,
                                                 &asset_server,
                                             );
                                         });
@@ -116,7 +117,11 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                             ..default()
                                         })
                                         .with_children(|wings_node| {
-                                            spawn_choose_button(wings_node, "Wings", &asset_server);
+                                            spawn_choose_button(
+                                                wings_node,
+                                                PartType::Wings,
+                                                &asset_server,
+                                            );
                                         });
                                 });
                             right_side
@@ -146,7 +151,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                         .with_children(|engine_node| {
                                             spawn_choose_button(
                                                 engine_node,
-                                                "Engine",
+                                                PartType::Engine,
                                                 &asset_server,
                                             );
                                         });
@@ -166,7 +171,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
                                         .with_children(|lasergun_node| {
                                             spawn_choose_button(
                                                 lasergun_node,
-                                                "Lasergun",
+                                                PartType::Lasergun,
                                                 &asset_server,
                                             );
                                         });
@@ -221,7 +226,7 @@ fn display(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn spawn_choose_button(
     node: &mut ChildBuilder,
-    name: &'static str,
+    part_type: PartType,
     asset_server: &Res<AssetServer>,
 ) {
     node.spawn_bundle(ButtonBundle {
@@ -236,7 +241,7 @@ fn spawn_choose_button(
         color: Color::ALICE_BLUE.into(),
         ..default()
     })
-    .insert(ChooseButton)
+    .insert(ChooseButton(part_type))
     .with_children(|button| {
         button.spawn_bundle(NodeBundle {
             style: Style {
@@ -249,7 +254,7 @@ fn spawn_choose_button(
         });
         button.spawn_bundle(
             TextBundle::from_section(
-                name,
+                format!("{:?}", part_type),
                 TextStyle {
                     font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
                     font_size: 10.0,
@@ -274,6 +279,27 @@ fn cancel_button(
             Interaction::None => Color::ALICE_BLUE.into(),
             Interaction::Clicked => {
                 state.set(AppState::FleetEditor).unwrap();
+                Color::GREEN.into()
+            }
+        }
+    }
+}
+
+fn choose_button(
+    mut state: ResMut<State<AppState>>,
+    mut part_selection_event_writer: EventWriter<PartSelectionEvent>,
+    mut button_query: Query<
+        (&Interaction, &mut UiColor, &ChooseButton),
+        (Changed<Interaction>, With<Button>),
+    >,
+) {
+    for (interaction, mut color, choose_button) in button_query.iter_mut() {
+        *color = match *interaction {
+            Interaction::Hovered => Color::GRAY.into(),
+            Interaction::None => Color::ALICE_BLUE.into(),
+            Interaction::Clicked => {
+                part_selection_event_writer.send(PartSelectionEvent(choose_button.0));
+                state.set(AppState::PartSelection).unwrap();
                 Color::GREEN.into()
             }
         }

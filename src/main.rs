@@ -20,6 +20,9 @@ mod log;
 mod main_menu;
 use main_menu::*;
 
+mod part_selection;
+use part_selection::*;
+
 mod parts;
 use parts::*;
 
@@ -48,6 +51,7 @@ fn main() {
         .add_plugin(FleetEditor)
         // .add_plugin(Loading)
         .add_plugin(MainMenu)
+        .add_plugin(PartSelection)
         .add_plugin(Parts)
         .add_plugin(ShipEditor)
         .add_plugin(ShipPlugin)

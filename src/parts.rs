@@ -11,10 +11,10 @@ impl Plugin for Parts {
 
 //TODO: #[derive(Default)]
 pub struct OwnedParts {
-    cockpit: Vec<Cockpit>,
-    engine: Vec<Engine>,
-    wings: Vec<Wings>,
-    lasergun: Vec<LaserGun>,
+    pub cockpit: Vec<Cockpit>,
+    pub engine: Vec<Engine>,
+    pub wings: Vec<Wings>,
+    pub lasergun: Vec<LaserGun>,
 }
 
 impl Default for OwnedParts {
@@ -56,24 +56,24 @@ pub struct BuildingShip {
     lasergun: Option<LaserGun>,
 }
 
-struct Cockpit {
+pub struct Cockpit {
     style: CockpitStyle,
     color: PartColor,
     //TODO: bonuses
 }
 
-struct Engine {
+pub struct Engine {
     style: EngineStyle,
     //TODO: bonuses
 }
 
-struct Wings {
+pub struct Wings {
     style: WingsStyle,
     color: PartColor,
     //TODO: bonuses
 }
 
-struct LaserGun {
+pub struct LaserGun {
     style: LaserGunStyle,
     //TODO: bonuses
 }
@@ -127,3 +127,15 @@ enum LaserGunStyle {
     TYPE9,
     TYPE10,
 }
+
+#[derive(Clone, Copy, Debug, Default)]
+pub enum PartType {
+    #[default]
+    Cockpit,
+    Engine,
+    Wings,
+    Lasergun,
+}
+
+#[derive(Default)]
+pub struct PartSelectionEvent(pub PartType);
