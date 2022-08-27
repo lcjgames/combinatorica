@@ -1,3 +1,5 @@
+extern crate core;
+
 use bevy::prelude::*;
 
 mod battle;
