@@ -49,6 +49,7 @@ fn main() {
         // .add_plugin(Loading)
         .add_plugin(MainMenu)
         .add_plugin(Parts)
+        .add_plugin(ShipEditor)
         .add_plugin(ShipPlugin)
         .add_plugin(Shop)
         .add_startup_system(spawn_main_camera)
