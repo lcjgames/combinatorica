@@ -31,6 +31,9 @@ use part_selection::*;
 mod parts;
 use parts::*;
 
+mod pilot_log;
+use pilot_log::*;
+
 mod ship;
 use ship::*;
 
@@ -58,6 +61,7 @@ fn main() {
         .add_plugin(MainMenu)
         .add_plugin(PartSelection)
         .add_plugin(Parts)
+        .add_plugin(PilotLogPlugin)
         .add_plugin(ShipEditor)
         .add_plugin(ShipPlugin)
         .add_plugin(Shop)
