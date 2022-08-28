@@ -46,6 +46,7 @@ impl Default for OwnedParts {
                 style: WingsStyle::TYPE3,
                 color: PartColor::RED,
                 strength: Strength(20.0),
+                same_style_cockpit_bonus: Strength(8.0),
             }],
             lasergun: vec![
                 LaserGun {
@@ -147,13 +148,11 @@ impl OwnedParts {
                 self.engine.push(Engine { style, strength });
             }
             PartType::Wings => {
-                let style = WingsStyle::from(rng.gen_range(0..=7));
-                let color = PartColor::from(rng.gen_range(0..4));
-                let strength = Strength(rng.gen_range(10.0..40.0));
                 self.wings.push(Wings {
-                    style,
-                    color,
-                    strength,
+                    style: WingsStyle::from(rng.gen_range(0..=7)),
+                    color: PartColor::from(rng.gen_range(0..4)),
+                    strength: Strength(rng.gen_range(10.0..40.0)),
+                    same_style_cockpit_bonus: Strength(rng.gen_range(5.0..10.00)),
                 });
             }
             PartType::Lasergun => {
@@ -191,11 +190,15 @@ impl BuildingShip {
     }
 
     pub fn bonus_strength(&self, parts: &OwnedParts) -> f32 {
-        let mut bonus_strength = 0.0;
         let cockpit = &parts.cockpit[self.cockpit_index];
         let wings = &parts.wings[self.wings_index];
+
+        let mut bonus_strength = 0.0;
         if cockpit.color == wings.color {
             bonus_strength += &cockpit.same_color_wing_bonus.0;
+        }
+        if cockpit.style.number() == wings.style.number() {
+            bonus_strength += &wings.same_style_cockpit_bonus.0;
         }
         bonus_strength
     }
@@ -245,14 +248,14 @@ pub struct Wings {
     style: WingsStyle,
     color: PartColor,
     strength: Strength,
-    //TODO: bonuses
+    same_style_cockpit_bonus: Strength,
 }
 
 impl Wings {
     fn description(&self) -> String {
         format!(
-            "A {:?} {:?} cockpit with strength {:?}",
-            self.color, self.style, self.strength.0
+            "A {:?} {:?} cockpit with strength {:?}. It will get a bonus {:.2} from having a {:?} wing.",
+            self.color, self.style, self.strength.0, self.same_style_cockpit_bonus.0, self.style
         )
     }
 }
