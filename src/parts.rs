@@ -10,7 +10,6 @@ impl Plugin for Parts {
     }
 }
 
-//TODO: #[derive(Default)]
 #[derive(Clone)]
 pub struct OwnedParts {
     pub cockpit: Vec<Cockpit>,
@@ -21,47 +20,19 @@ pub struct OwnedParts {
 
 impl Default for OwnedParts {
     fn default() -> Self {
-        Self {
-            cockpit: vec![Cockpit {
-                style: CockpitStyle::TYPE3,
-                color: PartColor::BLUE,
-                strength: Strength(20.0),
-                same_color_wing_bonus: Strength(0.0),
-            }],
-            engine: vec![
-                Engine {
-                    style: EngineStyle::TYPE3,
-                    strength: Strength(20.0),
-                    same_style_bonus: 30.0,
-                },
-                Engine {
-                    style: EngineStyle::TYPE1,
-                    strength: Strength(20.0),
-                    same_style_bonus: 30.0,
-                },
-                Engine {
-                    style: EngineStyle::TYPE5,
-                    strength: Strength(20.0),
-                    same_style_bonus: 30.0,
-                },
-            ],
-            wings: vec![Wings {
-                style: WingsStyle::TYPE3,
-                color: PartColor::RED,
-                strength: Strength(20.0),
-                same_style_cockpit_bonus: Strength(8.0),
-            }],
-            lasergun: vec![
-                LaserGun {
-                    style: LaserGunStyle::TYPE0,
-                    strength: Strength(20.0),
-                },
-                LaserGun {
-                    style: LaserGunStyle::TYPE3,
-                    strength: Strength(20.0),
-                },
-            ],
+        let mut parts = Self {
+            cockpit: Vec::new(),
+            engine: Vec::new(),
+            wings: Vec::new(),
+            lasergun: Vec::new(),
+        };
+        for i in 0..8 {
+            parts.add_random();
         }
+        while !parts.at_least_one_each() {
+            parts.add_random();
+        }
+        parts
     }
 }
 
@@ -161,9 +132,12 @@ impl OwnedParts {
                 });
             }
             PartType::Lasergun => {
-                let style = LaserGunStyle::from(rng.gen_range(0..=10));
-                let strength = Strength(rng.gen_range(10.0..40.0));
-                self.lasergun.push(LaserGun { style, strength });
+                self.lasergun.push(LaserGun {
+                    style: LaserGunStyle::from(rng.gen_range(0..=10)),
+                    strength: Strength(rng.gen_range(10.0..40.0)),
+                    bonus: Strength(rng.gen_range(1.0..6.0)),
+                    bonus_threshold: Strength(rng.gen_range(80.0..120.0)),
+                });
             }
         }
     }
@@ -206,6 +180,9 @@ impl BuildingShip {
         }
         if cockpit.style.number() == wings.style.number() {
             bonus_strength += &wings.same_style_cockpit_bonus.0;
+        }
+        if self.base_strength(parts) > lasergun.bonus_threshold.0 {
+            bonus_strength += &lasergun.bonus.0;
         }
         if engine.style.number() == cockpit.style.number()
             && engine.style.number() == wings.style.number()
@@ -251,7 +228,7 @@ pub struct Engine {
 impl Engine {
     fn description(&self) -> String {
         format!(
-            "A {:?} engine with strength {:?}. The ship will get a {:.2}% bonus on all bonuses if all parts are {:?}",
+            "A {:?} engine with strength {:.2}. The ship will get a {:.2}% bonus on all bonuses if all parts are {:?}",
             self.style, self.strength.0, self.same_style_bonus, self.style
         )
     }
@@ -268,7 +245,7 @@ pub struct Wings {
 impl Wings {
     fn description(&self) -> String {
         format!(
-            "A {:?} {:?} cockpit with strength {:?}. It will get a bonus {:.2} from having a {:?} wing.",
+            "A {:?} {:?} cockpit with strength {:.2}. It will get a bonus {:.2} from having a {:?} wing.",
             self.color, self.style, self.strength.0, self.same_style_cockpit_bonus.0, self.style
         )
     }
@@ -278,14 +255,15 @@ impl Wings {
 pub struct LaserGun {
     style: LaserGunStyle,
     strength: Strength,
-    //TODO: bonuses
+    bonus: Strength,
+    bonus_threshold: Strength,
 }
 
 impl LaserGun {
     fn description(&self) -> String {
         format!(
-            "A {:?} cockpit with strength {:?}",
-            self.style, self.strength.0
+            "A {:?} cockpit with strength {:.2}. It will get a bonus {:.2} if the ship's base strength is over {:.2}",
+            self.style, self.strength.0, self.bonus.0, self.bonus_threshold.0
         )
     }
 }
