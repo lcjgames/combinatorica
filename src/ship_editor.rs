@@ -68,7 +68,58 @@ fn display(
                             ..default()
                         })
                         .with_children(|left_side| {
-                            //TODO: owned parts
+                            let font = asset_server.load("fonts/Kenney Future.ttf"); //TODO: move loading to loading state
+                            let small_style = TextStyle {
+                                font: font.clone(),
+                                font_size: 25.0,
+                                color: Color::GRAY,
+                            };
+                            let big_style = TextStyle {
+                                font: font.clone(),
+                                font_size: 30.0,
+                                color: Color::ALICE_BLUE,
+                            };
+                            left_side.spawn_bundle(
+                                TextBundle::from_sections([
+                                    TextSection::new(
+                                        "Preview\n",
+                                        TextStyle {
+                                            font,
+                                            font_size: 30.0,
+                                            color: Color::GRAY,
+                                        },
+                                    ),
+                                    TextSection::new("\nBase Strength:\n", small_style.clone()),
+                                    TextSection::new(
+                                        format!("{:.2}\n", ship.base_strength(&owned_parts)),
+                                        big_style.clone(),
+                                    ),
+                                    TextSection::new("\nBonus Strength:\n", small_style.clone()),
+                                    TextSection::new(
+                                        format!("{:.2}\n", ship.bonus_strength(&owned_parts)),
+                                        big_style.clone(),
+                                    ),
+                                    TextSection::new("\nPossibilities:\n", small_style.clone()),
+                                    TextSection::new(
+                                        format!("{}\n", owned_parts.possibilities()),
+                                        big_style.clone(),
+                                    ),
+                                    TextSection::new("\nTotal Strength:\n", small_style.clone()),
+                                    TextSection::new(
+                                        format!("{:.2}\n", ship.strength(&owned_parts).0),
+                                        big_style.clone(),
+                                    ),
+                                ])
+                                .with_text_alignment(TextAlignment::BOTTOM_CENTER)
+                                .with_style(Style {
+                                    align_self: AlignSelf::Center,
+                                    max_size: Size {
+                                        width: Val::Px(300.0),
+                                        height: Val::Undefined,
+                                    },
+                                    ..default()
+                                }),
+                            );
                         });
                     upper_screen
                         .spawn_bundle(NodeBundle {

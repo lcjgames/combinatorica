@@ -114,6 +114,10 @@ impl OwnedParts {
             && self.lasergun.len() > 0
     }
 
+    pub fn possibilities(&self) -> usize {
+        self.cockpit.len() * self.engine.len() * self.wings.len() * self.lasergun.len()
+    }
+
     pub fn add_random(&mut self) {
         use rand::prelude::*;
         let mut rng = thread_rng();
@@ -187,14 +191,21 @@ impl BuildingShip {
         }
     }
 
-    pub fn strength(&self, parts: &OwnedParts) -> Strength {
-        let base_strength = parts.cockpit[self.cockpit_index].strength.0
+    pub fn base_strength(&self, parts: &OwnedParts) -> f32 {
+        parts.cockpit[self.cockpit_index].strength.0
             + parts.engine[self.engine_index].strength.0
             + parts.wings[self.wings_index].strength.0
-            + parts.lasergun[self.lasergun_index].strength.0;
-        let bonus = 0.0; //TODO
-        let possibilities =
-            parts.cockpit.len() * parts.engine.len() * parts.wings.len() * parts.lasergun.len();
+            + parts.lasergun[self.lasergun_index].strength.0
+    }
+
+    pub fn bonus_strength(&self, parts: &OwnedParts) -> f32 {
+        0.0 //TODO
+    }
+
+    pub fn strength(&self, parts: &OwnedParts) -> Strength {
+        let base_strength = self.base_strength(parts);
+        let bonus = self.bonus_strength(parts);
+        let possibilities = parts.possibilities();
         Strength((base_strength + bonus) * (1.0 + possibilities as f32 / 100.0))
     }
 }
