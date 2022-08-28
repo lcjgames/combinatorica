@@ -1,4 +1,3 @@
-use crate::combinatorics::{combination, max_combinations};
 use crate::{OwnedParts, PilotLogEvent};
 use bevy::prelude::*;
 use rand::Rng;
@@ -231,14 +230,14 @@ fn update_target(windows: Res<Windows>, mut query: Query<&mut Transform, With<Sh
 }
 
 fn target_force(
-    mut ship_query: Query<(&Transform, &mut ShipForce), With<ShipMarker>>,
+    mut ship_query: Query<(&Transform, &mut ShipForce, &Strength), With<ShipMarker>>,
     target_query: Query<&Transform, (Without<ShipMarker>, With<ShipTarget>)>,
 ) {
     let target_transform = target_query.single();
-    for (ship_transform, mut force) in ship_query.iter_mut() {
+    for (ship_transform, mut force, strength) in ship_query.iter_mut() {
         force.target_attraction_force = {
             let direction = target_transform.translation - ship_transform.translation;
-            10.0 * direction
+            direction * strength.0 / 10.0
         };
     }
 }
@@ -300,9 +299,10 @@ fn spawn_laser(
         for (meteor_entity, mut meteor_transform, mut meteor_hitbox) in meteor_query.iter_mut() {
             let distance_vector = ship_transform.translation - meteor_transform.translation;
             let distance = distance_vector.length();
-            if distance < 100.0 + meteor_hitbox.radius {
+            let range = ship_strength.0 + meteor_hitbox.radius;
+            if distance < range {
                 if rng.sample(distribution) {
-                    let quantity = rng.gen_range(100.0..200.0);
+                    let quantity = rng.gen_range(1.0..2.0) * ship_strength.0;
                     event_writer.send(PilotLogEvent(format!(
                         "{} found {:.2} bonus metal\n",
                         fleet.0[ship_index.0].pilot_name, quantity
