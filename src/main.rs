@@ -1,3 +1,5 @@
+#![feature(core_intrinsics)]
+
 extern crate core;
 
 use bevy::prelude::*;
