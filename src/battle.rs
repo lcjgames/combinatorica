@@ -277,14 +277,27 @@ fn spawn_laser(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut metal: ResMut<Metal>,
-    ship_query: Query<(&Transform, &Strength), With<ShipMarker>>,
+    ship_query: Query<(&Transform, &Strength, &ShipIndex), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
+    fleet: Res<Fleet>,
+    mut event_writer: EventWriter<PilotLogEvent>,
 ) {
-    for (ship_transform, ship_strength) in ship_query.iter() {
+    let mut rng = rand::thread_rng();
+    let bonus_metal_chance = 0.001 * fleet.combination_bonus_relative();
+    let distribution = rand::distributions::Bernoulli::new(bonus_metal_chance as f64).unwrap();
+    for (ship_transform, ship_strength, ship_index) in ship_query.iter() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
             let distance_vector = ship_transform.translation - meteor_transform.translation;
             let distance = distance_vector.length();
             if distance < 100.0 + meteor_hitbox.radius {
+                if rng.sample(distribution) {
+                    let quantity = rng.gen_range(100.0..200.0);
+                    event_writer.send(PilotLogEvent(format!(
+                        "{} found {:.2} bonus metal\n",
+                        fleet.0[ship_index.0].pilot_name, quantity
+                    )));
+                    metal.0 += quantity;
+                }
                 metal.0 += ship_strength.mine();
                 commands
                     .spawn_bundle(SpriteBundle {
@@ -396,11 +409,7 @@ fn destroy_ships(
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
             let distance = (ship_transform.translation - meteor_transform.translation).length();
             if distance < ship_hitbox.radius + meteor_hitbox.radius {
-                let combinations = combination(
-                    fleet.0.len(),
-                    fleet.0.iter().filter(|ship| ship.active).count(),
-                ) as f32;
-                let escape_chance = 0.05 * combinations / max_combinations(fleet.0.len()) as f32;
+                let escape_chance = 0.05 * fleet.combination_bonus_relative();
                 if rand::thread_rng().gen_range(0.0..1.0) < escape_chance {
                     ship_transform.translation = Vec3::default();
                     event_writer.send(PilotLogEvent(format!(
@@ -411,7 +420,7 @@ fn destroy_ships(
                     commands.entity(ship_entity).despawn_recursive();
                     fleet.0[ship_index.0].destroyed = true;
                     event_writer.send(PilotLogEvent(format!(
-                        "{}: Mayday! Mayday!",
+                        "{}: Mayday! Mayday!\n",
                         fleet.0[ship_index.0].pilot_name
                     )));
                 }
@@ -438,8 +447,13 @@ fn exit_timer(
     }
 }
 
-fn exit_buttons(input: Res<Input<KeyCode>>, mut state: ResMut<State<AppState>>) {
+fn exit_buttons(
+    input: Res<Input<KeyCode>>,
+    mut metal: ResMut<Metal>,
+    mut state: ResMut<State<AppState>>,
+) {
     if input.just_pressed(KeyCode::Escape) || input.just_pressed(KeyCode::Q) {
+        metal.0 = 0.0;
         state.set(AppState::FleetEditor).unwrap();
     }
 }

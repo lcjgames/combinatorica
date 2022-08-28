@@ -111,6 +111,12 @@ impl Fleet {
         let active = self.0.iter().filter(|ship| ship.active).count();
         combination(total, active) as f32
     }
+
+    pub fn combination_bonus_relative(&self) -> f32 {
+        use crate::combinatorics::max_combinations;
+
+        self.combination_bonus() / max_combinations(self.0.len()) as f32
+    }
 }
 
 pub const PILOT_NAMES: [&'static str; 25] = [

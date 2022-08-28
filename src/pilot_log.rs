@@ -39,7 +39,7 @@ fn spawn_pilot_log(mut commands: Commands) {
 }
 
 fn hello(mut event_writer: EventWriter<PilotLogEvent>, fleet: Res<Fleet>) {
-    for ship in &fleet.0 {
+    for ship in fleet.0.iter().filter(|ship| ship.active) {
         event_writer.send(PilotLogEvent(format!(
             "{} presenting for duties\n",
             ship.pilot_name
