@@ -288,7 +288,8 @@ fn spawn_laser(
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
             let distance_vector = ship_transform.translation - meteor_transform.translation;
             let distance = distance_vector.length();
-            if distance < 100.0 + meteor_hitbox.radius {
+            let range = ship_strength.0 + meteor_hitbox.radius;
+            if distance < range {
                 if rng.sample(distribution) {
                     let quantity = rng.gen_range(100.0..200.0);
                     event_writer.send(PilotLogEvent(format!(
