@@ -1,3 +1,4 @@
+use crate::Strength;
 use bevy::prelude::*;
 
 pub struct Parts;
@@ -24,28 +25,35 @@ impl Default for OwnedParts {
             cockpit: vec![Cockpit {
                 style: CockpitStyle::TYPE3,
                 color: PartColor::BLUE,
+                strength: Strength(20.0),
             }],
             engine: vec![
                 Engine {
                     style: EngineStyle::TYPE2,
+                    strength: Strength(20.0),
                 },
                 Engine {
                     style: EngineStyle::TYPE1,
+                    strength: Strength(20.0),
                 },
                 Engine {
                     style: EngineStyle::TYPE5,
+                    strength: Strength(20.0),
                 },
             ],
             wings: vec![Wings {
                 style: WingsStyle::TYPE3,
                 color: PartColor::RED,
+                strength: Strength(20.0),
             }],
             lasergun: vec![
                 LaserGun {
                     style: LaserGunStyle::TYPE0,
+                    strength: Strength(20.0),
                 },
                 LaserGun {
                     style: LaserGunStyle::TYPE0,
+                    strength: Strength(20.0),
                 },
             ],
         }
@@ -110,24 +118,48 @@ impl OwnedParts {
             PartType::Cockpit => {
                 let style = CockpitStyle::from(rng.gen_range(0..=7));
                 let color = PartColor::from(rng.gen_range(0..4));
-                crate::log::console_log!("New part: {:?} {:?} {:?}", color, style, part_type);
-                self.cockpit.push(Cockpit { style, color });
+                let strength = Strength(rng.gen_range(10.0..40.0));
+                crate::log::console_log!(
+                    "New part: {:?} {:?} {:?} {:?}",
+                    color,
+                    style,
+                    part_type,
+                    strength.0
+                );
+                self.cockpit.push(Cockpit {
+                    style,
+                    color,
+                    strength,
+                });
             }
             PartType::Engine => {
                 let style = EngineStyle::from(rng.gen_range(1..=5));
-                crate::log::console_log!("New part: {:?} {:?}", style, part_type);
-                self.engine.push(Engine { style });
+                let strength = Strength(rng.gen_range(10.0..40.0));
+                crate::log::console_log!("New part: {:?} {:?} {:?}", style, part_type, strength.0);
+                self.engine.push(Engine { style, strength });
             }
             PartType::Wings => {
                 let style = WingsStyle::from(rng.gen_range(0..=7));
                 let color = PartColor::from(rng.gen_range(0..4));
-                crate::log::console_log!("New part: {:?} {:?} {:?}", color, style, part_type);
-                self.wings.push(Wings { style, color });
+                let strength = Strength(rng.gen_range(10.0..40.0));
+                crate::log::console_log!(
+                    "New part: {:?} {:?} {:?} {:?}",
+                    color,
+                    style,
+                    part_type,
+                    strength.0
+                );
+                self.wings.push(Wings {
+                    style,
+                    color,
+                    strength,
+                });
             }
             PartType::Lasergun => {
                 let style = LaserGunStyle::from(rng.gen_range(0..=10));
-                crate::log::console_log!("New part: {:?} {:?}", style, part_type);
-                self.lasergun.push(LaserGun { style });
+                let strength = Strength(rng.gen_range(10.0..40.0));
+                crate::log::console_log!("New part: {:?} {:?} {:?}", style, part_type, strength.0);
+                self.lasergun.push(LaserGun { style, strength });
             }
         }
     }
@@ -150,18 +182,31 @@ impl BuildingShip {
             PartType::Lasergun => self.lasergun_index = index,
         }
     }
+
+    pub fn strength(&self, parts: &OwnedParts) -> Strength {
+        let base_strength = parts.cockpit[self.cockpit_index].strength.0
+            + parts.engine[self.engine_index].strength.0
+            + parts.wings[self.wings_index].strength.0
+            + parts.lasergun[self.lasergun_index].strength.0;
+        let bonus = 0.0; //TODO
+        let possibilities =
+            parts.cockpit.len() * parts.engine.len() * parts.wings.len() * parts.lasergun.len();
+        Strength((base_strength + bonus) * (1.0 + possibilities as f32 / 100.0))
+    }
 }
 
 #[derive(Clone)]
 pub struct Cockpit {
     style: CockpitStyle,
     color: PartColor,
+    strength: Strength,
     //TODO: bonuses
 }
 
 #[derive(Clone)]
 pub struct Engine {
     style: EngineStyle,
+    strength: Strength,
     //TODO: bonuses
 }
 
@@ -169,12 +214,14 @@ pub struct Engine {
 pub struct Wings {
     style: WingsStyle,
     color: PartColor,
+    strength: Strength,
     //TODO: bonuses
 }
 
 #[derive(Clone)]
 pub struct LaserGun {
     style: LaserGunStyle,
+    strength: Strength,
     //TODO: bonuses
 }
 

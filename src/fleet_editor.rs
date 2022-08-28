@@ -135,7 +135,10 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                                                     });
                                                 button.spawn_bundle(
                                                     TextBundle::from_section(
-                                                        ship.strength.0.to_string(),
+                                                        format!(
+                                                            "{:.2}",
+                                                            ship.strength.0.to_string()
+                                                        ),
                                                         TextStyle {
                                                             font: asset_server
                                                                 .load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
@@ -306,7 +309,7 @@ fn update_strength(
     let mut text = query.single_mut();
     *text = Text::from_sections([TextSection::new(
         format!(
-            "Fleet Information\nStrength: {}\nCombinations: {}\n",
+            "Fleet Information\nStrength: {:.2}\nCombinations: {}\n",
             fleet.strength(),
             fleet.combination_bonus()
         ),

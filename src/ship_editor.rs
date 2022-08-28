@@ -356,7 +356,7 @@ fn ok_button(
                 fleet.0.push(Ship {
                     wings_sprite: owned_parts.get_image(PartType::Wings, ship.wings_index),
                     cockpit_sprite: owned_parts.get_image(PartType::Cockpit, ship.cockpit_index),
-                    strength: Strength(50.0),
+                    strength: ship.strength(&owned_parts),
                     active: false,
                     destroyed: false,
                 });
