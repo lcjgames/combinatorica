@@ -353,6 +353,13 @@ fn ok_button(
             Interaction::Hovered => Color::GRAY.into(),
             Interaction::None => Color::ALICE_BLUE.into(),
             Interaction::Clicked => {
+                fleet.0.push(Ship {
+                    wings_sprite: owned_parts.get_image(PartType::Wings, ship.wings_index),
+                    cockpit_sprite: owned_parts.get_image(PartType::Cockpit, ship.cockpit_index),
+                    strength: Strength(50.0),
+                    active: false,
+                    destroyed: false,
+                });
                 owned_parts.cockpit = owned_parts
                     .cockpit
                     .iter()
@@ -381,14 +388,6 @@ fn ok_button(
                     .filter(|(i, _)| i != &ship.lasergun_index)
                     .map(|(_, x)| x.clone())
                     .collect();
-                fleet.0.push(Ship {
-                    parts: crate::ship::Parts {
-                        whole_ship: "spaceshooter/PNG/playerShip1_orange.png",
-                    },
-                    strength: Strength(50.0),
-                    active: false,
-                    destroyed: false,
-                });
                 *ship = BuildingShip::default();
                 state.set(AppState::FleetEditor).unwrap();
                 Color::GREEN.into()

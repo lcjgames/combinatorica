@@ -12,51 +12,78 @@ impl Plugin for ShipPlugin {
 pub struct ShipIndex(pub usize);
 
 #[derive(Clone)]
-pub struct Parts {
-    pub whole_ship: &'static str, // TODO: divide this into parts
-}
-
-#[derive(Clone)]
 pub struct Strength(pub f32);
 
 #[derive(Clone)]
 pub struct Ship {
-    pub parts: Parts,
+    pub wings_sprite: String,
+    pub cockpit_sprite: String,
     pub strength: Strength,
     pub active: bool,
     pub destroyed: bool,
+}
+
+impl Ship {
+    pub fn left_wing_position() -> Vec3 {
+        Vec3::new(-30.0, 15.0, -0.1)
+    }
+    pub fn right_wing_position() -> Vec3 {
+        let mut res = Self::left_wing_position();
+        res.x = -res.x;
+        res
+    }
+    pub fn cockpit_ui_style() -> Style {
+        Style {
+            size: Size::new(Val::Auto, Val::Percent(80.0)),
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Val::Percent(30.0),
+                right: Val::Percent(30.0),
+                top: Val::Percent(10.0),
+                bottom: Val::Percent(10.0),
+            },
+            ..default()
+        }
+    }
+    pub fn left_wing_ui_style() -> Style {
+        Style {
+            size: Size::new(Val::Auto, Val::Percent(80.0)),
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Val::Percent(60.0),
+                right: Val::Percent(10.0),
+                top: Val::Percent(10.0),
+                bottom: Val::Percent(10.0),
+            },
+            ..default()
+        }
+    }
+    pub fn right_wing_ui_style() -> Style {
+        Style {
+            size: Size::new(Val::Auto, Val::Percent(80.0)),
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Val::Percent(10.0),
+                right: Val::Percent(60.0),
+                top: Val::Percent(10.0),
+                bottom: Val::Percent(10.0),
+            },
+            ..default()
+        }
+    }
 }
 
 pub struct Fleet(pub Vec<Ship>);
 
 impl Default for Fleet {
     fn default() -> Self {
-        Fleet(vec![
-            Ship {
-                parts: Parts {
-                    whole_ship: "spaceshooter/PNG/playerShip1_blue.png", // TODO: use consts
-                },
-                strength: Strength(42.0),
-                active: false,
-                destroyed: false,
-            },
-            Ship {
-                parts: Parts {
-                    whole_ship: "spaceshooter/PNG/playerShip2_green.png",
-                },
-                strength: Strength(78.1),
-                active: false,
-                destroyed: false,
-            },
-            Ship {
-                parts: Parts {
-                    whole_ship: "spaceshooter/PNG/playerShip3_orange.png",
-                },
-                strength: Strength(55.3),
-                active: false,
-                destroyed: false,
-            },
-        ])
+        Fleet(vec![Ship {
+            wings_sprite: "spaceshooter/PNG/Parts/wingBlue_0.png".to_string(),
+            cockpit_sprite: "spaceshooter/PNG/Parts/cockpitBlue_0.png".to_string(),
+            strength: Strength(42.0),
+            active: false,
+            destroyed: false,
+        }])
     }
 }
 
