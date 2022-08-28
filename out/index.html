@@ -6,13 +6,33 @@
 </head>
 <body>
 <h1>Combinatorica</h1>
-A game made for the second Bevy game jam. Sprites taken from <a href="https://www.kenney.nl/">Kenney</a>.
-<br>
+A game made for the second Bevy game jam.<br>
+Sprites: taken from <a href="https://www.kenney.nl/">Kenney</a>.<br>
+Programming: Jorge Sousa and Luiz Chagas Jardim<br>
+Game design: Luiz Chagas Jardim<br>
+Music: Luiz Chagas Jardim<br>
 <a href="https://github.com/lcjgames/combinatorica">Repo</a>
 <br>
 <h2>How to Play</h2>
-TODO
+You are a great commander responsible for an asteroid mining operation.<br>
+Your greatest asset is the <i>possibility engine</i>, which powers your fleet by accessing the multiverse and using <a href="https://en.wikipedia.org/wiki/Combinatorics">combinatorics</a>.
+<h3>Fleet Editor</h3>
+Click on ships to add/remove them from the fleet.<br>
+<a href="https://en.wikipedia.org/wiki/Combination">Combinations</a> is the number of possible fleets with that number of ship.<br>
+The combination number influences events, such as miraculously saving a ship by bringing in a copy from another universe, or increasing your chances of finding extra metal from the multiverse<br>
+The plus button can be clicked if your have enough parts for a new ship<br>
+<h3>Ship Editor</h3>
+Select the parts you want.<br>
+Your ship's strength will have a bonus based on the number of possible ships, which is calculated according to the <a href="https://en.wikipedia.org/wiki/Rule_of_product">rule of product</a>.<br>
+The strength influences in-game calculations.<br>
+<h3>Mining</h3>
+Guide your pilots using the cursor. They are not very good pilots.<br>
+The pilots will try to avoid each other. The ship won't be destroyed if they collide with each other.<br>
+Get the ships close to the meteors to mine them with the laserguns. Don't get too close, though, or your ship will be lost forever.<br>
+You can press Esc to exit, but you will lose your metal.<br>
+After 60 seconds, the ships will come back with the metal, which will be automatically converted into random ship parts.<br>
 <br><br>
+<h2>Thanks for playing.</h2>
 <script>
     (function () {
       const audioContextList = [];

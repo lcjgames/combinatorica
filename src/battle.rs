@@ -1,5 +1,7 @@
-use crate::OwnedParts;
+use crate::combinatorics::{combination, max_combinations};
+use crate::{OwnedParts, PilotLogEvent};
 use bevy::prelude::*;
+use rand::Rng;
 use std::intrinsics::log2f32;
 
 use crate::ship::*;
@@ -202,7 +204,7 @@ fn update_that_text_on_the_screen(
         ),
         TextStyle {
             font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
-            font_size: 60.0,
+            font_size: 40.0,
             color: Color::GRAY,
         },
     )]);
@@ -275,14 +277,27 @@ fn spawn_laser(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut metal: ResMut<Metal>,
-    ship_query: Query<(&Transform, &Strength), With<ShipMarker>>,
+    ship_query: Query<(&Transform, &Strength, &ShipIndex), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
+    fleet: Res<Fleet>,
+    mut event_writer: EventWriter<PilotLogEvent>,
 ) {
-    for (ship_transform, ship_strength) in ship_query.iter() {
+    let mut rng = rand::thread_rng();
+    let bonus_metal_chance = 0.001 * fleet.combination_bonus_relative();
+    let distribution = rand::distributions::Bernoulli::new(bonus_metal_chance as f64).unwrap();
+    for (ship_transform, ship_strength, ship_index) in ship_query.iter() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
             let distance_vector = ship_transform.translation - meteor_transform.translation;
             let distance = distance_vector.length();
             if distance < 100.0 + meteor_hitbox.radius {
+                if rng.sample(distribution) {
+                    let quantity = rng.gen_range(100.0..200.0);
+                    event_writer.send(PilotLogEvent(format!(
+                        "{} found {:.2} bonus metal\n",
+                        fleet.0[ship_index.0].pilot_name, quantity
+                    )));
+                    metal.0 += quantity;
+                }
                 metal.0 += ship_strength.mine();
                 commands
                     .spawn_bundle(SpriteBundle {
@@ -385,16 +400,30 @@ fn movement(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
 
 fn destroy_ships(
     mut commands: Commands,
-    ship_query: Query<(Entity, &Transform, &HitBox, &ShipIndex), With<ShipMarker>>,
+    mut ship_query: Query<(Entity, &mut Transform, &HitBox, &ShipIndex), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
     mut fleet: ResMut<Fleet>,
+    mut event_writer: EventWriter<PilotLogEvent>,
 ) {
-    for (ship_entity, ship_transform, ship_hitbox, ship_index) in ship_query.iter() {
+    for (ship_entity, mut ship_transform, ship_hitbox, ship_index) in ship_query.iter_mut() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
             let distance = (ship_transform.translation - meteor_transform.translation).length();
             if distance < ship_hitbox.radius + meteor_hitbox.radius {
-                commands.entity(ship_entity).despawn_recursive();
-                fleet.0[ship_index.0].destroyed = true;
+                let escape_chance = 0.05 * fleet.combination_bonus_relative();
+                if rand::thread_rng().gen_range(0.0..1.0) < escape_chance {
+                    ship_transform.translation = Vec3::default();
+                    event_writer.send(PilotLogEvent(format!(
+                        "{} was saved by the multiverse\n",
+                        fleet.0[ship_index.0].pilot_name
+                    )));
+                } else {
+                    commands.entity(ship_entity).despawn_recursive();
+                    fleet.0[ship_index.0].destroyed = true;
+                    event_writer.send(PilotLogEvent(format!(
+                        "{}: Mayday! Mayday!\n",
+                        fleet.0[ship_index.0].pilot_name
+                    )));
+                }
             }
         }
     }
@@ -418,8 +447,13 @@ fn exit_timer(
     }
 }
 
-fn exit_buttons(input: Res<Input<KeyCode>>, mut state: ResMut<State<AppState>>) {
+fn exit_buttons(
+    input: Res<Input<KeyCode>>,
+    mut metal: ResMut<Metal>,
+    mut state: ResMut<State<AppState>>,
+) {
     if input.just_pressed(KeyCode::Escape) || input.just_pressed(KeyCode::Q) {
+        metal.0 = 0.0;
         state.set(AppState::FleetEditor).unwrap();
     }
 }

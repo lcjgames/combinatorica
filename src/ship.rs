@@ -27,6 +27,7 @@ pub struct Ship {
     pub strength: Strength,
     pub active: bool,
     pub destroyed: bool,
+    pub pilot_name: &'static str,
 }
 
 impl Ship {
@@ -89,6 +90,7 @@ impl Default for Fleet {
             strength: Strength(42.0),
             active: false,
             destroyed: false,
+            pilot_name: PILOT_NAMES[0],
         }])
     }
 }
@@ -109,4 +111,38 @@ impl Fleet {
         let active = self.0.iter().filter(|ship| ship.active).count();
         combination(total, active) as f32
     }
+
+    pub fn combination_bonus_relative(&self) -> f32 {
+        use crate::combinatorics::max_combinations;
+
+        self.combination_bonus() / max_combinations(self.0.len()) as f32
+    }
 }
+
+pub const PILOT_NAMES: [&'static str; 25] = [
+    "Serena",
+    "Luiz",
+    "Priscilla",
+    "Jorge",
+    "Antonio",
+    "Solo",
+    "Leela",
+    "Niobe",
+    "Cooper",
+    "Fox",
+    "Ayanami",
+    "Shinji",
+    "Aang",
+    "Dumont",
+    "Aldrin",
+    "Willy",
+    "Deckard",
+    "Kirk",
+    "Logan",
+    "Parker",
+    "OB1",
+    "R2",
+    "Stark",
+    "X",
+    "O'Hara",
+];
