@@ -172,7 +172,7 @@ fn display_part_buttons(
                             });
                             button.spawn_bundle(
                                 TextBundle::from_section(
-                                    "part", //TODO
+                                    format!("{:.2}", owned_parts.get_strength(part_type, index)),
                                     TextStyle {
                                         font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
                                         font_size: 15.0,

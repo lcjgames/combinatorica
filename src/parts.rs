@@ -107,6 +107,15 @@ impl OwnedParts {
         }
     }
 
+    pub fn get_strength(&self, part_type: PartType, index: usize) -> f32 {
+        match part_type {
+            PartType::Cockpit => self.cockpit[index].strength.0,
+            PartType::Engine => self.engine[index].strength.0,
+            PartType::Wings => self.wings[index].strength.0,
+            PartType::Lasergun => self.lasergun[index].strength.0,
+        }
+    }
+
     pub fn at_least_one_each(&self) -> bool {
         self.cockpit.len() > 0
             && self.engine.len() > 0

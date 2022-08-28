@@ -17,9 +17,11 @@ impl Plugin for Battle {
             .add_system_set(
                 SystemSet::on_enter(AppState::Battle).with_system(spawn_that_text_on_the_screen),
             )
+            .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn_pilot_log))
             .add_system_set(
                 SystemSet::on_update(AppState::Battle).with_system(update_that_text_on_the_screen),
             )
+            .add_system_set(SystemSet::on_update(AppState::Battle).with_system(update_pilot_log))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(update_target))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(target_force))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(ship_forces))
@@ -94,6 +96,9 @@ struct ExitTimer(Timer);
 
 #[derive(Component)]
 struct ThatTextOnTheScreen;
+
+#[derive(Component)]
+struct PilotLog;
 
 fn spawn_target(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
@@ -186,6 +191,25 @@ fn spawn_that_text_on_the_screen(mut commands: Commands) {
         .insert(Screen(AppState::Battle));
 }
 
+fn spawn_pilot_log(mut commands: Commands) {
+    commands
+        .spawn_bundle(
+            TextBundle::default()
+                .with_text_alignment(TextAlignment::CENTER_LEFT)
+                .with_style(Style {
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        right: Val::Px(10.0),
+                        bottom: Val::Px(10.0),
+                        ..default()
+                    },
+                    ..default()
+                }),
+        )
+        .insert(PilotLog)
+        .insert(Screen(AppState::Battle));
+}
+
 fn update_that_text_on_the_screen(
     asset_server: Res<AssetServer>,
     metal: Res<Metal>,
@@ -202,10 +226,36 @@ fn update_that_text_on_the_screen(
         ),
         TextStyle {
             font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
-            font_size: 60.0,
+            font_size: 40.0,
             color: Color::GRAY,
         },
     )]);
+}
+
+fn update_pilot_log(
+    asset_server: Res<AssetServer>,
+    mut text_query: Query<&mut Text, With<PilotLog>>,
+    timer_query: Query<&ExitTimer>,
+) {
+    let font = asset_server.load("fonts/Kenney Future.ttf"); //TODO: move loading to loading state;
+
+    let mut text = text_query.single_mut();
+    let mut logs = text.clone().sections;
+    logs.push(TextSection::new("Hello\n", TextStyle::default()));
+    let mut iterator = logs.iter().cloned();
+    if logs.len() > 5 {
+        iterator.advance_by(logs.len() - 5).unwrap();
+    }
+    *text = Text::from_sections(iterator.enumerate().map(|(index, section)| {
+        TextSection::new(
+            section.value,
+            TextStyle {
+                font: font.clone(),
+                font_size: 40.0,
+                color: Color::rgba(0.5, 0.5, 0.5, (index + 1) as f32 * 0.2),
+            },
+        )
+    }));
 }
 
 fn update_target(windows: Res<Windows>, mut query: Query<&mut Transform, With<ShipTarget>>) {
