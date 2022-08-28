@@ -14,7 +14,7 @@ impl Plugin for PilotLogPlugin {
     }
 }
 
-pub struct PilotLogEvent(String);
+pub struct PilotLogEvent(pub String);
 
 #[derive(Component)]
 struct PilotLog;

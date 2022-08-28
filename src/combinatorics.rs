@@ -19,3 +19,7 @@ pub fn combination(n: usize, m: usize) -> usize {
         }
     }
 }
+
+pub fn max_combinations(n: usize) -> usize {
+    combination(n, n / 2)
+}

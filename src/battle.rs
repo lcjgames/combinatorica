@@ -1,5 +1,7 @@
-use crate::OwnedParts;
+use crate::combinatorics::{combination, max_combinations};
+use crate::{OwnedParts, PilotLogEvent};
 use bevy::prelude::*;
+use rand::Rng;
 use std::intrinsics::log2f32;
 
 use crate::ship::*;
@@ -385,16 +387,34 @@ fn movement(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
 
 fn destroy_ships(
     mut commands: Commands,
-    ship_query: Query<(Entity, &Transform, &HitBox, &ShipIndex), With<ShipMarker>>,
+    mut ship_query: Query<(Entity, &mut Transform, &HitBox, &ShipIndex), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
     mut fleet: ResMut<Fleet>,
+    mut event_writer: EventWriter<PilotLogEvent>,
 ) {
-    for (ship_entity, ship_transform, ship_hitbox, ship_index) in ship_query.iter() {
+    for (ship_entity, mut ship_transform, ship_hitbox, ship_index) in ship_query.iter_mut() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
             let distance = (ship_transform.translation - meteor_transform.translation).length();
             if distance < ship_hitbox.radius + meteor_hitbox.radius {
-                commands.entity(ship_entity).despawn_recursive();
-                fleet.0[ship_index.0].destroyed = true;
+                let combinations = combination(
+                    fleet.0.len(),
+                    fleet.0.iter().filter(|ship| ship.active).count(),
+                ) as f32;
+                let escape_chance = 0.05 * combinations / max_combinations(fleet.0.len()) as f32;
+                if rand::thread_rng().gen_range(0.0..1.0) < escape_chance {
+                    ship_transform.translation = Vec3::default();
+                    event_writer.send(PilotLogEvent(format!(
+                        "{} was saved by the multiverse\n",
+                        fleet.0[ship_index.0].pilot_name
+                    )));
+                } else {
+                    commands.entity(ship_entity).despawn_recursive();
+                    fleet.0[ship_index.0].destroyed = true;
+                    event_writer.send(PilotLogEvent(format!(
+                        "{}: Mayday! Mayday!",
+                        fleet.0[ship_index.0].pilot_name
+                    )));
+                }
             }
         }
     }
