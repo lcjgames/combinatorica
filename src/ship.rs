@@ -23,6 +23,56 @@ pub struct Ship {
     pub destroyed: bool,
 }
 
+impl Ship {
+    pub fn left_wing_position() -> Vec3 {
+        Vec3::new(-30.0, 15.0, -0.1)
+    }
+    pub fn right_wing_position() -> Vec3 {
+        let mut res = Self::left_wing_position();
+        res.x = -res.x;
+        res
+    }
+    pub fn cockpit_ui_style() -> Style {
+        Style {
+            size: Size::new(Val::Auto, Val::Percent(80.0)),
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Val::Percent(30.0),
+                right: Val::Percent(30.0),
+                top: Val::Percent(10.0),
+                bottom: Val::Percent(10.0),
+            },
+            ..default()
+        }
+    }
+    pub fn left_wing_ui_style() -> Style {
+        Style {
+            size: Size::new(Val::Auto, Val::Percent(80.0)),
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Val::Percent(60.0),
+                right: Val::Percent(10.0),
+                top: Val::Percent(10.0),
+                bottom: Val::Percent(10.0),
+            },
+            ..default()
+        }
+    }
+    pub fn right_wing_ui_style() -> Style {
+        Style {
+            size: Size::new(Val::Auto, Val::Percent(80.0)),
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Val::Percent(10.0),
+                right: Val::Percent(60.0),
+                top: Val::Percent(10.0),
+                bottom: Val::Percent(10.0),
+            },
+            ..default()
+        }
+    }
+}
+
 pub struct Fleet(pub Vec<Ship>);
 
 impl Default for Fleet {

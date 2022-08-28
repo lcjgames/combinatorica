@@ -94,17 +94,45 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                                         .with_children(|button| {
                                             if index < fleet.0.len() {
                                                 let ship = &fleet.0[index];
-                                                button.spawn_bundle(ImageBundle {
-                                                    image: asset_server
-                                                        .load(ship.wings_sprite.as_str()) //TODO: add cockpit
-                                                        .into(),
-                                                    style: Style {
-                                                        size: Size::new(Val::Auto, Val::Px(50.0)),
+                                                button
+                                                    .spawn_bundle(NodeBundle {
+                                                        style: Style {
+                                                            size: Size::new(
+                                                                Val::Percent(100.0),
+                                                                Val::Percent(80.0),
+                                                            ),
+                                                            ..default()
+                                                        },
+                                                        color: Color::NONE.into(),
+                                                        focus_policy: FocusPolicy::Pass,
                                                         ..default()
-                                                    },
-                                                    focus_policy: FocusPolicy::Pass,
-                                                    ..default()
-                                                });
+                                                    })
+                                                    .with_children(|ship_node| {
+                                                        ship_node.spawn_bundle(ImageBundle {
+                                                            image: asset_server
+                                                                .load(ship.wings_sprite.as_str())
+                                                                .into(),
+                                                            style: Ship::left_wing_ui_style(),
+                                                            focus_policy: FocusPolicy::Pass,
+                                                            ..default()
+                                                        });
+                                                        ship_node.spawn_bundle(ImageBundle {
+                                                            image: asset_server
+                                                                .load(ship.wings_sprite.as_str())
+                                                                .into(),
+                                                            style: Ship::right_wing_ui_style(),
+                                                            focus_policy: FocusPolicy::Pass,
+                                                            ..default()
+                                                        });
+                                                        ship_node.spawn_bundle(ImageBundle {
+                                                            image: asset_server
+                                                                .load(ship.cockpit_sprite.as_str())
+                                                                .into(),
+                                                            style: Ship::cockpit_ui_style(),
+                                                            focus_policy: FocusPolicy::Pass,
+                                                            ..default()
+                                                        });
+                                                    });
                                                 button.spawn_bundle(
                                                     TextBundle::from_section(
                                                         ship.strength.0.to_string(),

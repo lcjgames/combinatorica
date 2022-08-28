@@ -103,9 +103,13 @@ fn spawn_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Re
     for (index, ship) in fleet.0.iter().enumerate().filter(|(_, ship)| ship.active) {
         commands
             .spawn_bundle(SpriteBundle {
-                texture: asset_server.load(ship.cockpit_sprite.as_str()), //TODO: add wings
+                texture: asset_server.load(ship.cockpit_sprite.as_str()),
                 transform: Transform::from_translation(Vec3::new((20 * index) as f32, 0.0, 1.0))
                     .with_scale(Vec3::splat(0.3)),
+                sprite: Sprite {
+                    flip_y: true,
+                    ..default()
+                },
                 ..default()
             })
             .insert(ShipMarker)
@@ -117,6 +121,25 @@ fn spawn_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Re
             })
             .insert(Screen(AppState::Battle))
             .with_children(|meteor| {
+                meteor.spawn_bundle(SpriteBundle {
+                    texture: asset_server.load(ship.wings_sprite.as_str()),
+                    transform: Transform::from_translation(Ship::right_wing_position()),
+                    sprite: Sprite {
+                        flip_y: true,
+                        ..default()
+                    },
+                    ..default()
+                });
+                meteor.spawn_bundle(SpriteBundle {
+                    texture: asset_server.load(ship.wings_sprite.as_str()),
+                    transform: Transform::from_translation(Ship::left_wing_position()),
+                    sprite: Sprite {
+                        flip_x: true,
+                        flip_y: true,
+                        ..default()
+                    },
+                    ..default()
+                });
                 meteor.spawn_bundle(SpriteBundle {
                     sprite: Sprite {
                         color: Color::rgba(0.2, 0.2, 0.6, 0.3),
