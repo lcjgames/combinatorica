@@ -1,4 +1,6 @@
+use crate::OwnedParts;
 use bevy::prelude::*;
+use std::intrinsics::log2f32;
 
 use crate::ship::*;
 use crate::state::*;
@@ -32,6 +34,7 @@ impl Plugin for Battle {
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(exit_timer))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(exit_buttons))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(show_all))
+            .add_system_set(SystemSet::on_exit(AppState::Battle).with_system(update_parts))
             .add_system_set(SystemSet::on_exit(AppState::Battle).with_system(update_fleet))
             .add_system_set(SystemSet::on_exit(AppState::Battle).with_system(screen_cleanup));
     }
@@ -426,6 +429,14 @@ fn show_all(input: Res<Input<KeyCode>>, mut query: Query<&mut Visibility>) {
         for mut visibility in query.iter_mut() {
             visibility.is_visible = true;
         }
+    }
+}
+
+fn update_parts(mut metal: ResMut<Metal>, mut owned_parts: ResMut<OwnedParts>) {
+    let number_of_new_parts = unsafe { log2f32(metal.0 / 100.0) as i32 };
+    metal.0 = 0.0;
+    for _ in 0..number_of_new_parts {
+        owned_parts.add_random();
     }
 }
 

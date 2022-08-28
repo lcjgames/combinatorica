@@ -101,6 +101,36 @@ impl OwnedParts {
             && self.wings.len() > 0
             && self.lasergun.len() > 0
     }
+
+    pub fn add_random(&mut self) {
+        use rand::prelude::*;
+        let mut rng = thread_rng();
+        let part_type = PartType::from(rng.gen_range(0..4));
+        match part_type {
+            PartType::Cockpit => {
+                let style = CockpitStyle::from(rng.gen_range(0..=7));
+                let color = PartColor::from(rng.gen_range(0..4));
+                crate::log::console_log!("New part: {:?} {:?} {:?}", color, style, part_type);
+                self.cockpit.push(Cockpit { style, color });
+            }
+            PartType::Engine => {
+                let style = EngineStyle::from(rng.gen_range(1..=5));
+                crate::log::console_log!("New part: {:?} {:?}", style, part_type);
+                self.engine.push(Engine { style });
+            }
+            PartType::Wings => {
+                let style = WingsStyle::from(rng.gen_range(0..=7));
+                let color = PartColor::from(rng.gen_range(0..4));
+                crate::log::console_log!("New part: {:?} {:?} {:?}", color, style, part_type);
+                self.wings.push(Wings { style, color });
+            }
+            PartType::Lasergun => {
+                let style = LaserGunStyle::from(rng.gen_range(0..=10));
+                crate::log::console_log!("New part: {:?} {:?}", style, part_type);
+                self.lasergun.push(LaserGun { style });
+            }
+        }
+    }
 }
 
 #[derive(Default)]
@@ -148,7 +178,7 @@ pub struct LaserGun {
     //TODO: bonuses
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum PartColor {
     BLUE,
     GREEN,
@@ -167,7 +197,19 @@ impl PartColor {
     }
 }
 
-#[derive(Clone)]
+impl From<i32> for PartColor {
+    fn from(n: i32) -> Self {
+        match n {
+            0 => PartColor::BLUE,
+            1 => PartColor::GREEN,
+            2 => PartColor::RED,
+            3 => PartColor::YELLOW,
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 enum CockpitStyle {
     TYPE0,
     TYPE1,
@@ -194,7 +236,23 @@ impl CockpitStyle {
     }
 }
 
-#[derive(Clone)]
+impl From<i32> for CockpitStyle {
+    fn from(n: i32) -> Self {
+        match n {
+            0 => CockpitStyle::TYPE0,
+            1 => CockpitStyle::TYPE1,
+            2 => CockpitStyle::TYPE2,
+            3 => CockpitStyle::TYPE3,
+            4 => CockpitStyle::TYPE4,
+            5 => CockpitStyle::TYPE5,
+            6 => CockpitStyle::TYPE6,
+            7 => CockpitStyle::TYPE7,
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 enum EngineStyle {
     TYPE1,
     TYPE2,
@@ -215,7 +273,20 @@ impl EngineStyle {
     }
 }
 
-#[derive(Clone)]
+impl From<i32> for EngineStyle {
+    fn from(n: i32) -> Self {
+        match n {
+            1 => EngineStyle::TYPE1,
+            2 => EngineStyle::TYPE2,
+            3 => EngineStyle::TYPE3,
+            4 => EngineStyle::TYPE4,
+            5 => EngineStyle::TYPE5,
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 enum WingsStyle {
     TYPE0,
     TYPE1,
@@ -242,7 +313,23 @@ impl WingsStyle {
     }
 }
 
-#[derive(Clone)]
+impl From<i32> for WingsStyle {
+    fn from(n: i32) -> Self {
+        match n {
+            0 => WingsStyle::TYPE0,
+            1 => WingsStyle::TYPE1,
+            2 => WingsStyle::TYPE2,
+            3 => WingsStyle::TYPE3,
+            4 => WingsStyle::TYPE4,
+            5 => WingsStyle::TYPE5,
+            6 => WingsStyle::TYPE6,
+            7 => WingsStyle::TYPE7,
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 enum LaserGunStyle {
     TYPE0,
     TYPE1,
@@ -275,6 +362,25 @@ impl LaserGunStyle {
     }
 }
 
+impl From<i32> for LaserGunStyle {
+    fn from(n: i32) -> Self {
+        match n {
+            0 => LaserGunStyle::TYPE0,
+            1 => LaserGunStyle::TYPE1,
+            2 => LaserGunStyle::TYPE2,
+            3 => LaserGunStyle::TYPE3,
+            4 => LaserGunStyle::TYPE4,
+            5 => LaserGunStyle::TYPE5,
+            6 => LaserGunStyle::TYPE6,
+            7 => LaserGunStyle::TYPE7,
+            8 => LaserGunStyle::TYPE8,
+            9 => LaserGunStyle::TYPE9,
+            10 => LaserGunStyle::TYPE10,
+            _ => unreachable!(),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default)]
 pub enum PartType {
     #[default]
@@ -282,6 +388,18 @@ pub enum PartType {
     Engine,
     Wings,
     Lasergun,
+}
+
+impl From<i32> for PartType {
+    fn from(n: i32) -> Self {
+        match n {
+            0 => PartType::Cockpit,
+            1 => PartType::Engine,
+            2 => PartType::Wings,
+            3 => PartType::Lasergun,
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(Clone, Default)]
