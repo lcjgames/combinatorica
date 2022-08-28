@@ -7,7 +7,8 @@ pub struct Battle;
 
 impl Plugin for Battle {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn_target))
+        app.init_resource::<Metal>()
+            .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn_target))
             .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn_ships))
             .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn_meteor_spawner))
             .add_system_set(SystemSet::on_enter(AppState::Battle).with_system(spawn_exit_timer))
@@ -35,6 +36,9 @@ impl Plugin for Battle {
             .add_system_set(SystemSet::on_exit(AppState::Battle).with_system(screen_cleanup));
     }
 }
+
+#[derive(Default)]
+struct Metal(f32);
 
 #[derive(Component)]
 struct ShipTarget;
@@ -112,6 +116,7 @@ fn spawn_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Re
                 },
                 ..default()
             })
+            .insert(ship.strength.clone())
             .insert(ShipMarker)
             .insert(ShipIndex(index))
             .insert(ShipForce::default())
@@ -180,6 +185,7 @@ fn spawn_that_text_on_the_screen(mut commands: Commands) {
 
 fn update_that_text_on_the_screen(
     asset_server: Res<AssetServer>,
+    metal: Res<Metal>,
     mut text_query: Query<&mut Text, With<ThatTextOnTheScreen>>,
     timer_query: Query<&ExitTimer>,
 ) {
@@ -187,7 +193,8 @@ fn update_that_text_on_the_screen(
     let timer = timer_query.single();
     *text = Text::from_sections([TextSection::new(
         format!(
-            "Time left: {:.2}\n(Press Esc to exit)",
+            "Metal: {:.2}\nTime left: {:.2}\n(Press Esc to exit)",
+            metal.0,
             (timer.0.duration() - timer.0.elapsed()).as_secs_f32()
         ),
         TextStyle {
@@ -264,14 +271,16 @@ fn steer_ships(
 fn spawn_laser(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    ship_query: Query<&Transform, With<ShipMarker>>,
+    mut metal: ResMut<Metal>,
+    ship_query: Query<(&Transform, &Strength), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
 ) {
-    for ship_transform in ship_query.iter() {
+    for (ship_transform, ship_strength) in ship_query.iter() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
             let distance_vector = ship_transform.translation - meteor_transform.translation;
             let distance = distance_vector.length();
             if distance < 100.0 + meteor_hitbox.radius {
+                metal.0 += ship_strength.mine();
                 commands
                     .spawn_bundle(SpriteBundle {
                         texture: asset_server.load("spaceshooter/PNG/Lasers/laserRed05.png"),

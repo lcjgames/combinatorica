@@ -11,8 +11,14 @@ impl Plugin for ShipPlugin {
 #[derive(Component)]
 pub struct ShipIndex(pub usize);
 
-#[derive(Clone)]
+#[derive(Clone, Component)]
 pub struct Strength(pub f32);
+
+impl Strength {
+    pub fn mine(&self) -> f32 {
+        self.0 / 100.0
+    }
+}
 
 #[derive(Clone)]
 pub struct Ship {
