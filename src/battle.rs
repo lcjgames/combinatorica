@@ -291,7 +291,7 @@ fn spawn_laser(
             let range = ship_strength.0 + meteor_hitbox.radius;
             if distance < range {
                 if rng.sample(distribution) {
-                    let quantity = rng.gen_range(100.0..200.0);
+                    let quantity = rng.gen_range(1.0..2.0) * ship_strength.0;
                     event_writer.send(PilotLogEvent(format!(
                         "{} found {:.2} bonus metal\n",
                         fleet.0[ship_index.0].pilot_name, quantity
