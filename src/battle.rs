@@ -278,7 +278,10 @@ fn spawn_laser(
     asset_server: Res<AssetServer>,
     mut metal: ResMut<Metal>,
     ship_query: Query<(&Transform, &Strength, &ShipIndex), With<ShipMarker>>,
-    mut meteor_query: Query<(Entity, &mut Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
+    mut meteor_query: Query<
+        (Entity, &mut Transform, &mut HitBox),
+        (With<Meteor>, Without<ShipMarker>),
+    >,
     fleet: Res<Fleet>,
     mut event_writer: EventWriter<PilotLogEvent>,
 ) {
@@ -286,7 +289,7 @@ fn spawn_laser(
     let bonus_metal_chance = 0.001 * fleet.combination_bonus_relative();
     let distribution = rand::distributions::Bernoulli::new(bonus_metal_chance as f64).unwrap();
     for (ship_transform, ship_strength, ship_index) in ship_query.iter() {
-        for (meteor_entity, mut meteor_transform, meteor_hitbox) in meteor_query.iter_mut() {
+        for (meteor_entity, mut meteor_transform, mut meteor_hitbox) in meteor_query.iter_mut() {
             let distance_vector = ship_transform.translation - meteor_transform.translation;
             let distance = distance_vector.length();
             if distance < 100.0 + meteor_hitbox.radius {
@@ -318,7 +321,9 @@ fn spawn_laser(
                     })
                     .insert(Screen(AppState::Battle));
                 // HACK: slow shrinks shrinks the same way
-                meteor_transform.scale *= 0.99;
+                const SHRINK_CONSTANT: f32 = 0.995;
+                meteor_transform.scale *= SHRINK_CONSTANT;
+                meteor_hitbox.radius *= SHRINK_CONSTANT;
                 if meteor_transform.scale.x < 0.25 {
                     commands.entity(meteor_entity).despawn_recursive();
                 }
