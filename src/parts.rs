@@ -99,8 +99,12 @@ impl OwnedParts {
     }
 
     pub fn get_description(&self, part_type: PartType, index: usize) -> String {
-        //TODO
-        "Description".to_string()
+        match part_type {
+            PartType::Cockpit => self.cockpit[index].description(),
+            PartType::Engine => self.engine[index].description(),
+            PartType::Wings => self.wings[index].description(),
+            PartType::Lasergun => self.lasergun[index].description(),
+        }
     }
 
     pub fn at_least_one_each(&self) -> bool {
@@ -203,11 +207,29 @@ pub struct Cockpit {
     //TODO: bonuses
 }
 
+impl Cockpit {
+    fn description(&self) -> String {
+        format!(
+            "A {:?} {:?} cockpit with strength {:?}",
+            self.color, self.style, self.strength.0
+        )
+    }
+}
+
 #[derive(Clone)]
 pub struct Engine {
     style: EngineStyle,
     strength: Strength,
     //TODO: bonuses
+}
+
+impl Engine {
+    fn description(&self) -> String {
+        format!(
+            "A {:?} engine with strength {:?}",
+            self.style, self.strength.0
+        )
+    }
 }
 
 #[derive(Clone)]
@@ -218,11 +240,29 @@ pub struct Wings {
     //TODO: bonuses
 }
 
+impl Wings {
+    fn description(&self) -> String {
+        format!(
+            "A {:?} {:?} cockpit with strength {:?}",
+            self.color, self.style, self.strength.0
+        )
+    }
+}
+
 #[derive(Clone)]
 pub struct LaserGun {
     style: LaserGunStyle,
     strength: Strength,
     //TODO: bonuses
+}
+
+impl LaserGun {
+    fn description(&self) -> String {
+        format!(
+            "A {:?} cockpit with strength {:?}",
+            self.style, self.strength.0
+        )
+    }
 }
 
 #[derive(Clone, Debug)]

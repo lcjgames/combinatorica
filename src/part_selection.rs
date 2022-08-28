@@ -90,7 +90,15 @@ fn display_parts(
                                             color: Color::DARK_GRAY,
                                         },
                                     )
-                                    .with_text_alignment(TextAlignment::BOTTOM_CENTER),
+                                    .with_text_alignment(TextAlignment::BOTTOM_CENTER)
+                                    .with_style(Style {
+                                        align_self: AlignSelf::FlexEnd,
+                                        max_size: Size {
+                                            width: Val::Px(800.0),
+                                            height: Val::Undefined,
+                                        },
+                                        ..default()
+                                    }),
                                 )
                                 .insert(DescriptionText);
                         });
