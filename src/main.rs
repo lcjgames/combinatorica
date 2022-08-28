@@ -42,6 +42,9 @@ use shop::*;
 mod state;
 use state::*;
 
+mod sound;
+use sound::*;
+
 fn main() {
     // When building for WASM, print panics to the browser console
     #[cfg(target_arch = "wasm32")]
@@ -60,6 +63,7 @@ fn main() {
         .add_plugin(ShipEditor)
         .add_plugin(ShipPlugin)
         .add_plugin(Shop)
+        .add_plugin(Sound)
         .add_startup_system(spawn_main_camera)
         .add_startup_system(display_background)
         .run();

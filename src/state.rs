@@ -1,6 +1,7 @@
 use bevy::prelude::*;
+use enum_iterator::IntoEnumIterator;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, IntoEnumIterator, PartialEq, Eq, Hash)]
 pub enum AppState {
     // Loading,
     MainMenu,
