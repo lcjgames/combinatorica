@@ -27,6 +27,7 @@ pub struct Ship {
     pub strength: Strength,
     pub active: bool,
     pub destroyed: bool,
+    pub pilot_name: &'static str,
 }
 
 impl Ship {
@@ -89,6 +90,7 @@ impl Default for Fleet {
             strength: Strength(42.0),
             active: false,
             destroyed: false,
+            pilot_name: PILOT_NAMES[0],
         }])
     }
 }
@@ -110,3 +112,31 @@ impl Fleet {
         combination(total, active) as f32
     }
 }
+
+pub const PILOT_NAMES: [&'static str; 25] = [
+    "Serena",
+    "Luiz",
+    "Priscilla",
+    "Jorge",
+    "Antonio",
+    "Solo",
+    "Leela",
+    "Niobe",
+    "Cooper",
+    "Fox",
+    "Ayanami",
+    "Shinji",
+    "Aang",
+    "Dumont",
+    "Aldrin",
+    "Willy",
+    "Deckard",
+    "Kirk",
+    "Logan",
+    "Parker",
+    "OB1",
+    "R2",
+    "Stark",
+    "X",
+    "O'Hara",
+];

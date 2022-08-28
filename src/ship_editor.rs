@@ -399,6 +399,9 @@ fn ok_button(
     mut owned_parts: ResMut<OwnedParts>,
     mut fleet: ResMut<Fleet>,
 ) {
+    use rand::prelude::*;
+    let mut rng = thread_rng();
+
     for (interaction, mut color) in button_query.iter_mut() {
         *color = match *interaction {
             Interaction::Hovered => Color::GRAY.into(),
@@ -410,6 +413,7 @@ fn ok_button(
                     strength: ship.strength(&owned_parts),
                     active: false,
                     destroyed: false,
+                    pilot_name: PILOT_NAMES[rng.gen_range(0..PILOT_NAMES.len())],
                 });
                 owned_parts.cockpit = owned_parts
                     .cockpit
