@@ -26,6 +26,7 @@ impl Default for OwnedParts {
                 style: CockpitStyle::TYPE3,
                 color: PartColor::BLUE,
                 strength: Strength(20.0),
+                same_color_wing_bonus: Strength(0.0),
             }],
             engine: vec![
                 Engine {
@@ -133,39 +134,22 @@ impl OwnedParts {
         let part_type = PartType::from(rng.gen_range(0..4));
         match part_type {
             PartType::Cockpit => {
-                let style = CockpitStyle::from(rng.gen_range(0..=7));
-                let color = PartColor::from(rng.gen_range(0..4));
-                let strength = Strength(rng.gen_range(10.0..40.0));
-                crate::log::console_log!(
-                    "New part: {:?} {:?} {:?} {:?}",
-                    color,
-                    style,
-                    part_type,
-                    strength.0
-                );
                 self.cockpit.push(Cockpit {
-                    style,
-                    color,
-                    strength,
+                    style: CockpitStyle::from(rng.gen_range(0..=7)),
+                    color: PartColor::from(rng.gen_range(0..4)),
+                    strength: Strength(rng.gen_range(10.0..40.0)),
+                    same_color_wing_bonus: Strength(rng.gen_range(5.0..10.00)),
                 });
             }
             PartType::Engine => {
                 let style = EngineStyle::from(rng.gen_range(1..=5));
                 let strength = Strength(rng.gen_range(10.0..40.0));
-                crate::log::console_log!("New part: {:?} {:?} {:?}", style, part_type, strength.0);
                 self.engine.push(Engine { style, strength });
             }
             PartType::Wings => {
                 let style = WingsStyle::from(rng.gen_range(0..=7));
                 let color = PartColor::from(rng.gen_range(0..4));
                 let strength = Strength(rng.gen_range(10.0..40.0));
-                crate::log::console_log!(
-                    "New part: {:?} {:?} {:?} {:?}",
-                    color,
-                    style,
-                    part_type,
-                    strength.0
-                );
                 self.wings.push(Wings {
                     style,
                     color,
@@ -175,7 +159,6 @@ impl OwnedParts {
             PartType::Lasergun => {
                 let style = LaserGunStyle::from(rng.gen_range(0..=10));
                 let strength = Strength(rng.gen_range(10.0..40.0));
-                crate::log::console_log!("New part: {:?} {:?} {:?}", style, part_type, strength.0);
                 self.lasergun.push(LaserGun { style, strength });
             }
         }
@@ -208,7 +191,13 @@ impl BuildingShip {
     }
 
     pub fn bonus_strength(&self, parts: &OwnedParts) -> f32 {
-        0.0 //TODO
+        let mut bonus_strength = 0.0;
+        let cockpit = &parts.cockpit[self.cockpit_index];
+        let wings = &parts.wings[self.wings_index];
+        if cockpit.color == wings.color {
+            bonus_strength += &cockpit.same_color_wing_bonus.0;
+        }
+        bonus_strength
     }
 
     pub fn strength(&self, parts: &OwnedParts) -> Strength {
@@ -224,14 +213,14 @@ pub struct Cockpit {
     style: CockpitStyle,
     color: PartColor,
     strength: Strength,
-    //TODO: bonuses
+    same_color_wing_bonus: Strength,
 }
 
 impl Cockpit {
     fn description(&self) -> String {
         format!(
-            "A {:?} {:?} cockpit with strength {:?}",
-            self.color, self.style, self.strength.0
+            "A {:?} {:?} cockpit with strength {:.2}. It will get a bonus {:.2} from having a {:?} wing.",
+            self.color, self.style, self.strength.0, self.same_color_wing_bonus.0, self.color
         )
     }
 }
@@ -240,7 +229,6 @@ impl Cockpit {
 pub struct Engine {
     style: EngineStyle,
     strength: Strength,
-    //TODO: bonuses
 }
 
 impl Engine {
@@ -285,7 +273,7 @@ impl LaserGun {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 enum PartColor {
     BLUE,
     GREEN,

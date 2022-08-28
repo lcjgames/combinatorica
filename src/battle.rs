@@ -459,7 +459,11 @@ fn destroy_ships(
     }
 }
 
-fn despawn_explosion(mut commands: Commands, time: Res<Time>, mut query: Query<(Entity, &mut Explosion)>) {
+fn despawn_explosion(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut query: Query<(Entity, &mut Explosion)>,
+) {
     for (entity, mut explosion) in query.iter_mut() {
         explosion.timer.tick(time.delta());
         if explosion.timer.finished() {
