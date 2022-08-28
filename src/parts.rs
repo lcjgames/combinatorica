@@ -30,16 +30,19 @@ impl Default for OwnedParts {
             }],
             engine: vec![
                 Engine {
-                    style: EngineStyle::TYPE2,
+                    style: EngineStyle::TYPE3,
                     strength: Strength(20.0),
+                    same_style_bonus: 30.0,
                 },
                 Engine {
                     style: EngineStyle::TYPE1,
                     strength: Strength(20.0),
+                    same_style_bonus: 30.0,
                 },
                 Engine {
                     style: EngineStyle::TYPE5,
                     strength: Strength(20.0),
+                    same_style_bonus: 30.0,
                 },
             ],
             wings: vec![Wings {
@@ -54,7 +57,7 @@ impl Default for OwnedParts {
                     strength: Strength(20.0),
                 },
                 LaserGun {
-                    style: LaserGunStyle::TYPE0,
+                    style: LaserGunStyle::TYPE3,
                     strength: Strength(20.0),
                 },
             ],
@@ -143,9 +146,11 @@ impl OwnedParts {
                 });
             }
             PartType::Engine => {
-                let style = EngineStyle::from(rng.gen_range(1..=5));
-                let strength = Strength(rng.gen_range(10.0..40.0));
-                self.engine.push(Engine { style, strength });
+                self.engine.push(Engine {
+                    style: EngineStyle::from(rng.gen_range(1..=5)),
+                    strength: Strength(rng.gen_range(10.0..40.0)),
+                    same_style_bonus: rng.gen_range(50.0..150.0),
+                });
             }
             PartType::Wings => {
                 self.wings.push(Wings {
@@ -192,6 +197,8 @@ impl BuildingShip {
     pub fn bonus_strength(&self, parts: &OwnedParts) -> f32 {
         let cockpit = &parts.cockpit[self.cockpit_index];
         let wings = &parts.wings[self.wings_index];
+        let lasergun = &parts.lasergun[self.lasergun_index];
+        let engine = &parts.engine[self.engine_index];
 
         let mut bonus_strength = 0.0;
         if cockpit.color == wings.color {
@@ -199,6 +206,12 @@ impl BuildingShip {
         }
         if cockpit.style.number() == wings.style.number() {
             bonus_strength += &wings.same_style_cockpit_bonus.0;
+        }
+        if engine.style.number() == cockpit.style.number()
+            && engine.style.number() == wings.style.number()
+            && engine.style.number() == lasergun.style.number()
+        {
+            bonus_strength *= 1.0 + &engine.same_style_bonus / 100.0;
         }
         bonus_strength
     }
@@ -232,13 +245,14 @@ impl Cockpit {
 pub struct Engine {
     style: EngineStyle,
     strength: Strength,
+    same_style_bonus: f32,
 }
 
 impl Engine {
     fn description(&self) -> String {
         format!(
-            "A {:?} engine with strength {:?}",
-            self.style, self.strength.0
+            "A {:?} engine with strength {:?}. The ship will get a {:.2}% bonus on all bonuses if all parts are {:?}",
+            self.style, self.strength.0, self.same_style_bonus, self.style
         )
     }
 }
