@@ -30,6 +30,7 @@ impl Plugin for Battle {
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(movement))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(spawn_laser))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(despawn_laser))
+            .add_system_set(SystemSet::on_update(AppState::Battle).with_system(despawn_explosion))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(despawn_meteor))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(destroy_ships))
             .add_system_set(SystemSet::on_update(AppState::Battle).with_system(exit_no_ship))
@@ -47,6 +48,13 @@ struct Metal(f32);
 
 #[derive(Component)]
 struct ShipTarget;
+
+#[derive(Component)]
+struct Explosion {
+    timer: Timer,
+}
+
+const EXPLOSION_DURATION: f32 = 0.6;
 
 #[derive(Component)]
 struct ShipMarker;
@@ -400,6 +408,7 @@ fn movement(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
 
 fn destroy_ships(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut ship_query: Query<(Entity, &mut Transform, &HitBox, &ShipIndex), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
     mut fleet: ResMut<Fleet>,
@@ -417,6 +426,17 @@ fn destroy_ships(
                         fleet.0[ship_index.0].pilot_name
                     )));
                 } else {
+                    commands
+                        .spawn_bundle(SpriteBundle {
+                            texture: asset_server.load("spaceshooter/PNG/Lasers/laserBlue08.png"),
+                            transform: Transform::from_translation(ship_transform.translation)
+                                .with_scale(Vec3::splat(0.9)),
+                            ..default()
+                        })
+                        .insert(Explosion {
+                            timer: Timer::from_seconds(EXPLOSION_DURATION, false),
+                        })
+                        .insert(Screen(AppState::Battle));
                     commands.entity(ship_entity).despawn_recursive();
                     fleet.0[ship_index.0].destroyed = true;
                     event_writer.send(PilotLogEvent(format!(
@@ -425,6 +445,15 @@ fn destroy_ships(
                     )));
                 }
             }
+        }
+    }
+}
+
+fn despawn_explosion(mut commands: Commands, time: Res<Time>, mut query: Query<(Entity, &mut Explosion)>) {
+    for (entity, mut explosion) in query.iter_mut() {
+        explosion.timer.tick(time.delta());
+        if explosion.timer.finished() {
+            commands.entity(entity).despawn_recursive();
         }
     }
 }
