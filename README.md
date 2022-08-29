@@ -32,3 +32,11 @@ Build, then run this:
 cd out
 python3 -m http.server <port>
 ```
+
+# TODO:
+* fix right wing ui
+* bonus strength calculation
+* meteor merging
+* how it fits
+* sfx
+* load stuff beforehand

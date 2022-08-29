@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::Texture;
+use bevy_kira_audio::AudioSource;
 
 use crate::state::AppState;
 
@@ -17,6 +18,9 @@ pub struct Sprites {
     pub bg: Handle<Image>,
     // texture: asset_server.load("spaceshooter/PNG/Lasers/laserBlue08.png"),
     pub explosion: Handle<Image>,
+    pub main_menu_ost: Handle<AudioSource>,
+    pub editors_ost: Handle<AudioSource>,
+    pub mining_ost: Handle<AudioSource>,
 }
 
 impl Plugin for Loading {
@@ -59,7 +63,7 @@ fn load(
         assets_loading.push(handle.clone_untyped());
         handle
     };
-//asset_server.load("spaceshooter/Backgrounds/black.png"
+    //asset_server.load("spaceshooter/Backgrounds/black.png"
     sprites.bg = {
         let handle = server.load("spaceshooter/Backgrounds/black.png");
         assets_loading.push(handle.clone_untyped());
@@ -68,6 +72,24 @@ fn load(
 
     sprites.explosion = {
         let handle = server.load("spaceshooter/PNG/Lasers/laserBlue08.png");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
+
+    sprites.main_menu_ost = {
+        let handle = server.load("title_screen.ogg");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
+
+    sprites.editors_ost = {
+        let handle = server.load("battle.ogg");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
+
+    sprites.mining_ost = {
+        let handle = server.load("shop_screen.ogg");
         assets_loading.push(handle.clone_untyped());
         handle
     };

@@ -30,7 +30,12 @@ struct RightSide;
 #[derive(Component)]
 struct GoButton;
 
-fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Res<Fleet>, sprites: Res<Sprites>) {
+fn display_ships(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    fleet: Res<Fleet>,
+    sprites: Res<Sprites>,
+) {
     let n_columns = 3;
     let n_rows = 8;
     commands
@@ -307,7 +312,7 @@ fn go_button_activation(
 fn update_strength(
     mut query: Query<&mut Text, With<RightSide>>,
     fleet: Res<Fleet>,
-    sprites: Res<Sprites>
+    sprites: Res<Sprites>,
 ) {
     let mut text = query.single_mut();
     *text = Text::from_sections([TextSection::new(

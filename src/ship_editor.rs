@@ -4,8 +4,8 @@ use bevy::ui::FocusPolicy;
 
 use crate::parts::*;
 use crate::ship::*;
-use crate::Sprites;
 use crate::state::*;
+use crate::Sprites;
 
 pub struct ShipEditor;
 
@@ -37,7 +37,7 @@ fn display(
     asset_server: Res<AssetServer>,
     ship: Res<BuildingShip>,
     owned_parts: Res<OwnedParts>,
-    sprites: Res<Sprites>
+    sprites: Res<Sprites>,
 ) {
     commands
         .spawn_bundle(NodeBundle {
@@ -339,7 +339,7 @@ fn spawn_choose_button(
     part_type: PartType,
     asset_server: &Res<AssetServer>,
     image: &String,
-    sprites: &Res<Sprites>
+    sprites: &Res<Sprites>,
 ) {
     node.spawn_bundle(ButtonBundle {
         style: Style {

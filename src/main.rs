@@ -74,11 +74,7 @@ fn main() {
         .run();
 }
 
-fn display_background(
-    mut commands: Commands,
-    windows: Res<Windows>,
-    sprites: Res<Sprites>,
-) {
+fn display_background(mut commands: Commands, windows: Res<Windows>, sprites: Res<Sprites>) {
     let window = windows.get_primary().unwrap();
     let window_size = Vec3::new(window.width(), window.height(), 0.0);
     let start_position = -window_size / 2.0;

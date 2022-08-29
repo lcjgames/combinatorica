@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 use crate::ship::*;
-use crate::Sprites;
 use crate::state::*;
+use crate::Sprites;
 
 pub struct PilotLogPlugin;
 
@@ -51,7 +51,7 @@ fn hello(mut event_writer: EventWriter<PilotLogEvent>, fleet: Res<Fleet>) {
 fn update_pilot_log(
     mut text_query: Query<&mut Text, With<PilotLog>>,
     mut event_reader: EventReader<PilotLogEvent>,
-    sprites: Res<Sprites>
+    sprites: Res<Sprites>,
 ) {
     const MAX_MESSAGES: usize = 5;
 

@@ -199,7 +199,7 @@ fn update_that_text_on_the_screen(
     metal: Res<Metal>,
     mut text_query: Query<&mut Text, With<ThatTextOnTheScreen>>,
     timer_query: Query<&ExitTimer>,
-    sprites: Res<Sprites>
+    sprites: Res<Sprites>,
 ) {
     let mut text = text_query.single_mut();
     let timer = timer_query.single();
@@ -422,7 +422,7 @@ fn destroy_ships(
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
     mut fleet: ResMut<Fleet>,
     mut event_writer: EventWriter<PilotLogEvent>,
-    sprites: Res<Sprites>
+    sprites: Res<Sprites>,
 ) {
     for (ship_entity, mut ship_transform, ship_hitbox, ship_index) in ship_query.iter_mut() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {

@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use bevy::ui::FocusPolicy;
 
 use crate::parts::*;
-use crate::Sprites;
 use crate::state::*;
+use crate::Sprites;
 
 pub struct PartSelection;
 
@@ -30,7 +30,7 @@ fn display_parts(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     owned_parts: Res<OwnedParts>,
-    sprites: Res<Sprites>
+    sprites: Res<Sprites>,
 ) {
     let part_type = part_selection_event_reader
         .iter()
@@ -70,7 +70,13 @@ fn display_parts(
                             ..default()
                         })
                         .with_children(|left_side| {
-                            display_part_buttons(left_side, &asset_server, &owned_parts, part_type, &sprites);
+                            display_part_buttons(
+                                left_side,
+                                &asset_server,
+                                &owned_parts,
+                                part_type,
+                                &sprites,
+                            );
                         });
                     upper_screen
                         .spawn_bundle(NodeBundle {
@@ -121,7 +127,7 @@ fn display_part_buttons(
     asset_server: &Res<AssetServer>,
     owned_parts: &OwnedParts,
     part_type: PartType,
-    sprites: &Res<Sprites>
+    sprites: &Res<Sprites>,
 ) {
     let n_columns = 3;
     let n_rows = 5;
@@ -200,7 +206,7 @@ fn part_button_interaction(
     owned_parts: Res<OwnedParts>,
     mut ship: ResMut<BuildingShip>,
     mut query: Query<&mut Text, With<DescriptionText>>,
-    sprites: Res<Sprites>
+    sprites: Res<Sprites>,
 ) {
     for (interaction, mut color, part_index) in button_query.iter_mut() {
         *color = match *interaction {
