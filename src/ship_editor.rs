@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::sprite::SpriteSystem;
 use bevy::ui::FocusPolicy;
 
 use crate::parts::*;

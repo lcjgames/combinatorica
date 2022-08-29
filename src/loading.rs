@@ -1,5 +1,5 @@
+use crate::{screen_cleanup, Screen};
 use bevy::prelude::*;
-use bevy::render::render_resource::Texture;
 use bevy_kira_audio::AudioSource;
 
 use crate::state::AppState;
@@ -26,12 +26,35 @@ impl Plugin for Loading {
         app.init_resource::<AssetsLoading>()
             .init_resource::<Sprites>()
             .add_system_set(SystemSet::on_enter(AppState::Loading).with_system(load))
-            .add_system_set(SystemSet::on_update(AppState::Loading).with_system(check_loading));
+            .add_system_set(SystemSet::on_enter(AppState::Loading).with_system(spawn_text))
+            .add_system_set(SystemSet::on_update(AppState::Loading).with_system(check_loading))
+            .add_system_set(SystemSet::on_exit(AppState::Loading).with_system(screen_cleanup));
     }
 }
 
 #[derive(Default, Deref, DerefMut)]
 struct AssetsLoading(Vec<HandleUntyped>);
+
+fn spawn_text(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands
+        .spawn_bundle(
+            TextBundle::from_section(
+                "Loading...",
+                TextStyle {
+                    font: asset_server.load("fonts/Kenney Future.ttf"),
+                    font_size: 50.0,
+                    color: Color::ALICE_BLUE,
+                },
+            )
+            .with_text_alignment(TextAlignment::TOP_CENTER)
+            .with_style(Style {
+                align_self: AlignSelf::Center,
+                position_type: PositionType::Absolute,
+                ..default()
+            }),
+        )
+        .insert(Screen(AppState::Loading));
+}
 
 fn load(
     server: Res<AssetServer>,
