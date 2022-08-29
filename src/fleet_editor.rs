@@ -138,10 +138,7 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                                                     });
                                                 button.spawn_bundle(
                                                     TextBundle::from_section(
-                                                        format!(
-                                                            "{:.2}",
-                                                            ship.strength.0.to_string()
-                                                        ),
+                                                        format!("{:.2}", ship.strength.0),
                                                         TextStyle {
                                                             font: asset_server
                                                                 .load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
