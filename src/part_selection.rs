@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::ui::FocusPolicy;
 
 use crate::parts::*;
+use crate::Sprites;
 use crate::state::*;
 
 pub struct PartSelection;
@@ -29,6 +30,7 @@ fn display_parts(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     owned_parts: Res<OwnedParts>,
+    sprites: Res<Sprites>
 ) {
     let part_type = part_selection_event_reader
         .iter()
@@ -68,7 +70,7 @@ fn display_parts(
                             ..default()
                         })
                         .with_children(|left_side| {
-                            display_part_buttons(left_side, &asset_server, &owned_parts, part_type);
+                            display_part_buttons(left_side, &asset_server, &owned_parts, part_type, &sprites);
                         });
                     upper_screen
                         .spawn_bundle(NodeBundle {
@@ -85,7 +87,7 @@ fn display_parts(
                                     TextBundle::from_section(
                                         "", //TODO
                                         TextStyle {
-                                            font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                                            font: sprites.font.clone(),
                                             font_size: 15.0,
                                             color: Color::DARK_GRAY,
                                         },
@@ -119,6 +121,7 @@ fn display_part_buttons(
     asset_server: &Res<AssetServer>,
     owned_parts: &OwnedParts,
     part_type: PartType,
+    sprites: &Res<Sprites>
 ) {
     let n_columns = 3;
     let n_rows = 5;
@@ -174,7 +177,7 @@ fn display_part_buttons(
                                 TextBundle::from_section(
                                     format!("{:.2}", owned_parts.get_strength(part_type, index)),
                                     TextStyle {
-                                        font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                                        font: sprites.font.clone(),
                                         font_size: 15.0,
                                         color: Color::DARK_GRAY,
                                     },
@@ -190,7 +193,6 @@ fn display_part_buttons(
 
 fn part_button_interaction(
     mut state: ResMut<State<AppState>>,
-    asset_server: Res<AssetServer>,
     mut button_query: Query<
         (&Interaction, &mut UiColor, &PartIndex),
         (Changed<Interaction>, With<Button>),
@@ -198,6 +200,7 @@ fn part_button_interaction(
     owned_parts: Res<OwnedParts>,
     mut ship: ResMut<BuildingShip>,
     mut query: Query<&mut Text, With<DescriptionText>>,
+    sprites: Res<Sprites>
 ) {
     for (interaction, mut color, part_index) in button_query.iter_mut() {
         *color = match *interaction {
@@ -209,7 +212,7 @@ fn part_button_interaction(
                         owned_parts.get_description(part_index.0, part_index.1)
                     ),
                     TextStyle {
-                        font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                        font: sprites.font.clone(),
                         font_size: 60.0,
                         color: Color::GRAY,
                     },

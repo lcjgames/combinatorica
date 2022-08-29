@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::ship::*;
+use crate::Sprites;
 use crate::state::*;
 
 pub struct PilotLogPlugin;
@@ -48,13 +49,13 @@ fn hello(mut event_writer: EventWriter<PilotLogEvent>, fleet: Res<Fleet>) {
 }
 
 fn update_pilot_log(
-    asset_server: Res<AssetServer>,
     mut text_query: Query<&mut Text, With<PilotLog>>,
     mut event_reader: EventReader<PilotLogEvent>,
+    sprites: Res<Sprites>
 ) {
     const MAX_MESSAGES: usize = 5;
 
-    let font = asset_server.load("fonts/Kenney Future.ttf"); //TODO: move loading to loading state;
+    let font = sprites.font.clone();
 
     let mut text = text_query.single_mut();
     let mut logs = text.clone().sections;

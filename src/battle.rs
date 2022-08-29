@@ -1,4 +1,4 @@
-use crate::{OwnedParts, PilotLogEvent};
+use crate::{OwnedParts, PilotLogEvent, Sprites};
 use bevy::prelude::*;
 use rand::Rng;
 use std::intrinsics::log2f32;
@@ -196,10 +196,10 @@ fn spawn_that_text_on_the_screen(mut commands: Commands) {
 }
 
 fn update_that_text_on_the_screen(
-    asset_server: Res<AssetServer>,
     metal: Res<Metal>,
     mut text_query: Query<&mut Text, With<ThatTextOnTheScreen>>,
     timer_query: Query<&ExitTimer>,
+    sprites: Res<Sprites>
 ) {
     let mut text = text_query.single_mut();
     let timer = timer_query.single();
@@ -210,7 +210,7 @@ fn update_that_text_on_the_screen(
             (timer.0.duration() - timer.0.elapsed()).as_secs_f32()
         ),
         TextStyle {
-            font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+            font: sprites.font.clone(),
             font_size: 40.0,
             color: Color::GRAY,
         },

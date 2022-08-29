@@ -1,4 +1,4 @@
-use crate::OwnedParts;
+use crate::{OwnedParts, Sprites};
 use bevy::prelude::*;
 use bevy::ui::FocusPolicy;
 
@@ -30,7 +30,7 @@ struct RightSide;
 #[derive(Component)]
 struct GoButton;
 
-fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Res<Fleet>) {
+fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: Res<Fleet>, sprites: Res<Sprites>) {
     let n_columns = 3;
     let n_rows = 8;
     commands
@@ -212,7 +212,7 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                                 TextBundle::from_section(
                                     "Go!",
                                     TextStyle {
-                                        font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                                        font: sprites.font.clone(),
                                         font_size: 30.0,
                                         color: Color::DARK_GRAY,
                                     },
@@ -305,9 +305,9 @@ fn go_button_activation(
 }
 
 fn update_strength(
-    asset_server: Res<AssetServer>,
     mut query: Query<&mut Text, With<RightSide>>,
     fleet: Res<Fleet>,
+    sprites: Res<Sprites>
 ) {
     let mut text = query.single_mut();
     *text = Text::from_sections([TextSection::new(
@@ -317,7 +317,7 @@ fn update_strength(
             fleet.combination_bonus()
         ),
         TextStyle {
-            font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+            font: sprites.font.clone(),
             font_size: 60.0,
             color: Color::GRAY,
         },

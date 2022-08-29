@@ -16,8 +16,8 @@ mod combinatorics;
 mod fleet_editor;
 use fleet_editor::*;
 
-// mod loading;
-// use loading::*;
+mod loading;
+use loading::*;
 
 #[macro_use]
 mod log;
@@ -56,11 +56,11 @@ fn main() {
 
     console_log!("Starting Game!");
     App::new()
-        .add_state(AppState::MainMenu)
+        .add_state(AppState::Loading)
         .add_plugins(DefaultPlugins)
         .add_plugin(Battle)
         .add_plugin(FleetEditor)
-        // .add_plugin(Loading)
+        .add_plugin(Loading)
         .add_plugin(MainMenu)
         .add_plugin(PartSelection)
         .add_plugin(Parts)

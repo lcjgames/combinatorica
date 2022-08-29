@@ -25,7 +25,7 @@ enum Song {
 impl From<AppState> for Song {
     fn from(state: AppState) -> Self {
         match state {
-            AppState::MainMenu => Song::MainTheme,
+            AppState::MainMenu | AppState::Loading => Song::MainTheme,
             AppState::Battle => Song::BattleTheme,
             AppState::FleetEditor
             | AppState::PartSelection
