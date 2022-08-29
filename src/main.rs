@@ -74,12 +74,16 @@ fn main() {
         .run();
 }
 
-fn display_background(mut commands: Commands, windows: Res<Windows>, sprites: Res<Sprites>) {
+fn display_background(
+    mut commands: Commands,
+    windows: Res<Windows>,
+    asset_server: Res<AssetServer>,
+) {
     let window = windows.get_primary().unwrap();
     let window_size = Vec3::new(window.width(), window.height(), 0.0);
     let start_position = -window_size / 2.0;
 
-    let bg = sprites.bg.clone();
+    let bg = asset_server.load("spaceshooter/Backgrounds/black.png");
     let size = 256;
     let n_horizontal = window.width().round() as i32 / size + 2;
     let n_vertical = window.height().round() as i32 / size + 2;

@@ -14,8 +14,6 @@ pub struct Sprites {
     pub laser: Handle<Image>,
     //texture: asset_server.load("spaceshooter/PNG/Meteors/meteorBrown_big1.png"),
     pub meteor: Handle<Image>,
-    //asset_server.load("spaceshooter/Backgrounds/black.png");
-    pub bg: Handle<Image>,
     // texture: asset_server.load("spaceshooter/PNG/Lasers/laserBlue08.png"),
     pub explosion: Handle<Image>,
     pub main_menu_ost: Handle<AudioSource>,
@@ -60,12 +58,6 @@ fn load(
 
     sprites.meteor = {
         let handle = server.load("spaceshooter/PNG/Meteors/meteorBrown_big1.png");
-        assets_loading.push(handle.clone_untyped());
-        handle
-    };
-    //asset_server.load("spaceshooter/Backgrounds/black.png"
-    sprites.bg = {
-        let handle = server.load("spaceshooter/Backgrounds/black.png");
         assets_loading.push(handle.clone_untyped());
         handle
     };
