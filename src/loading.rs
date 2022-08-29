@@ -9,6 +9,8 @@ pub struct Loading;
 pub struct Sprites {
     pub font: Handle<Font>,
     pub cursor: Handle<Image>,
+    //asset_server.load("spaceshooter/PNG/Lasers/laserRed05.png"),
+    pub laser: Handle<Image>,
 }
 
 impl Plugin for Loading {
@@ -39,6 +41,13 @@ fn load(
         assets_loading.push(handle.clone_untyped());
         handle
     };
+
+    sprites.laser = {
+        let handle = server.load("spaceshooter/PNG/Lasers/laserRed05.png");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
+
 }
 
 fn check_loading(

@@ -282,7 +282,6 @@ fn steer_ships(
 
 fn spawn_laser(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut metal: ResMut<Metal>,
     ship_query: Query<(&Transform, &Strength, &ShipIndex), With<ShipMarker>>,
     mut meteor_query: Query<
@@ -291,6 +290,7 @@ fn spawn_laser(
     >,
     fleet: Res<Fleet>,
     mut event_writer: EventWriter<PilotLogEvent>,
+    sprites: Res<Sprites>,
 ) {
     let mut rng = rand::thread_rng();
     let bonus_metal_chance = 0.001 * fleet.combination_bonus_relative();
@@ -312,7 +312,7 @@ fn spawn_laser(
                 metal.0 += ship_strength.mine();
                 commands
                     .spawn_bundle(SpriteBundle {
-                        texture: asset_server.load("spaceshooter/PNG/Lasers/laserRed05.png"),
+                        texture: sprites.laser.clone(),
                         transform: Transform::from_translation(
                             (ship_transform.translation + meteor_transform.translation) / 2.0
                                 - 0.3 * Vec3::Z,
