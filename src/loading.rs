@@ -97,13 +97,13 @@ fn load(
         handle
     };
 
-    sprites.editors_ost = {
+    sprites.mining_ost = {
         let handle = server.load("battle.ogg");
         assets_loading.push(handle.clone_untyped());
         handle
     };
 
-    sprites.mining_ost = {
+    sprites.editors_ost = {
         let handle = server.load("shop_screen.ogg");
         assets_loading.push(handle.clone_untyped());
         handle
