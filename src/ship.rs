@@ -80,20 +80,8 @@ impl Ship {
     }
 }
 
+#[derive(Default)]
 pub struct Fleet(pub Vec<Ship>);
-
-impl Default for Fleet {
-    fn default() -> Self {
-        Fleet(vec![Ship {
-            wings_sprite: "spaceshooter/PNG/Parts/wingBlue_0.png".to_string(),
-            cockpit_sprite: "spaceshooter/PNG/Parts/cockpitBlue_0.png".to_string(),
-            strength: Strength(42.0),
-            active: false,
-            destroyed: false,
-            pilot_name: PILOT_NAMES[0],
-        }])
-    }
-}
 
 impl Fleet {
     pub fn strength(&self) -> f32 {
