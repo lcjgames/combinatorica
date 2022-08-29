@@ -418,11 +418,11 @@ fn movement(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
 
 fn destroy_ships(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut ship_query: Query<(Entity, &mut Transform, &HitBox, &ShipIndex), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
     mut fleet: ResMut<Fleet>,
     mut event_writer: EventWriter<PilotLogEvent>,
+    sprites: Res<Sprites>
 ) {
     for (ship_entity, mut ship_transform, ship_hitbox, ship_index) in ship_query.iter_mut() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
@@ -438,7 +438,7 @@ fn destroy_ships(
                 } else {
                     commands
                         .spawn_bundle(SpriteBundle {
-                            texture: asset_server.load("spaceshooter/PNG/Lasers/laserBlue08.png"),
+                            texture: sprites.explosion.clone(),
                             transform: Transform::from_translation(ship_transform.translation)
                                 .with_scale(Vec3::splat(0.9)),
                             ..default()
