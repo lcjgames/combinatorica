@@ -11,6 +11,8 @@ pub struct Sprites {
     pub cursor: Handle<Image>,
     //asset_server.load("spaceshooter/PNG/Lasers/laserRed05.png"),
     pub laser: Handle<Image>,
+    //texture: asset_server.load("spaceshooter/PNG/Meteors/meteorBrown_big1.png"),
+    pub meteor: Handle<Image>,
 }
 
 impl Plugin for Loading {
@@ -48,6 +50,11 @@ fn load(
         handle
     };
 
+    sprites.meteor = {
+        let handle = server.load("spaceshooter/PNG/Meteors/meteorBrown_big1.png");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
 }
 
 fn check_loading(

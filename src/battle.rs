@@ -359,9 +359,9 @@ fn despawn_meteor(mut commands: Commands, query: Query<(Entity, &Transform), Wit
 
 fn spawn_meteors(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     time: Res<Time>,
     mut query: Query<&mut MeteorSpawner>,
+    sprites: Res<Sprites>,
 ) {
     use rand::prelude::*;
     use std::f32::consts::PI;
@@ -384,7 +384,7 @@ fn spawn_meteors(
     if spawner.timer.finished() {
         commands
             .spawn_bundle(SpriteBundle {
-                texture: asset_server.load("spaceshooter/PNG/Meteors/meteorBrown_big1.png"),
+                texture: sprites.meteor.clone(),
                 transform: Transform::from_translation(spawn_position)
                     .with_scale(Vec3::splat(size)),
                 ..default()
