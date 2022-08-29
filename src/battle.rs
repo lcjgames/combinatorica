@@ -1,4 +1,4 @@
-use crate::{OwnedParts, PilotLogEvent};
+use crate::{OwnedParts, PilotLogEvent, Sprites};
 use bevy::prelude::*;
 use rand::Rng;
 use std::intrinsics::log2f32;
@@ -104,10 +104,10 @@ struct ExitTimer(Timer);
 #[derive(Component)]
 struct ThatTextOnTheScreen;
 
-fn spawn_target(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_target(mut commands: Commands, sprites: Res<Sprites>) {
     commands
         .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("spaceshooter/PNG/UI/cursor.png"), // TODO: move to loading
+            texture: sprites.cursor.clone(),
             transform: Transform::from_translation(Vec3::Z),
             ..default()
         })
@@ -196,10 +196,10 @@ fn spawn_that_text_on_the_screen(mut commands: Commands) {
 }
 
 fn update_that_text_on_the_screen(
-    asset_server: Res<AssetServer>,
     metal: Res<Metal>,
     mut text_query: Query<&mut Text, With<ThatTextOnTheScreen>>,
     timer_query: Query<&ExitTimer>,
+    sprites: Res<Sprites>,
 ) {
     let mut text = text_query.single_mut();
     let timer = timer_query.single();
@@ -210,7 +210,7 @@ fn update_that_text_on_the_screen(
             (timer.0.duration() - timer.0.elapsed()).as_secs_f32()
         ),
         TextStyle {
-            font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+            font: sprites.font.clone(),
             font_size: 40.0,
             color: Color::GRAY,
         },
@@ -282,7 +282,6 @@ fn steer_ships(
 
 fn spawn_laser(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut metal: ResMut<Metal>,
     ship_query: Query<(&Transform, &Strength, &ShipIndex), With<ShipMarker>>,
     mut meteor_query: Query<
@@ -291,6 +290,7 @@ fn spawn_laser(
     >,
     fleet: Res<Fleet>,
     mut event_writer: EventWriter<PilotLogEvent>,
+    sprites: Res<Sprites>,
 ) {
     let mut rng = rand::thread_rng();
     let bonus_metal_chance = 0.001 * fleet.combination_bonus_relative();
@@ -312,7 +312,7 @@ fn spawn_laser(
                 metal.0 += ship_strength.mine();
                 commands
                     .spawn_bundle(SpriteBundle {
-                        texture: asset_server.load("spaceshooter/PNG/Lasers/laserRed05.png"),
+                        texture: sprites.laser.clone(),
                         transform: Transform::from_translation(
                             (ship_transform.translation + meteor_transform.translation) / 2.0
                                 - 0.3 * Vec3::Z,
@@ -359,9 +359,9 @@ fn despawn_meteor(mut commands: Commands, query: Query<(Entity, &Transform), Wit
 
 fn spawn_meteors(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     time: Res<Time>,
     mut query: Query<&mut MeteorSpawner>,
+    sprites: Res<Sprites>,
 ) {
     use rand::prelude::*;
     use std::f32::consts::PI;
@@ -384,7 +384,7 @@ fn spawn_meteors(
     if spawner.timer.finished() {
         commands
             .spawn_bundle(SpriteBundle {
-                texture: asset_server.load("spaceshooter/PNG/Meteors/meteorBrown_big1.png"),
+                texture: sprites.meteor.clone(),
                 transform: Transform::from_translation(spawn_position)
                     .with_scale(Vec3::splat(size)),
                 ..default()
@@ -418,11 +418,11 @@ fn movement(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
 
 fn destroy_ships(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut ship_query: Query<(Entity, &mut Transform, &HitBox, &ShipIndex), With<ShipMarker>>,
     meteor_query: Query<(&Transform, &HitBox), (With<Meteor>, Without<ShipMarker>)>,
     mut fleet: ResMut<Fleet>,
     mut event_writer: EventWriter<PilotLogEvent>,
+    sprites: Res<Sprites>,
 ) {
     for (ship_entity, mut ship_transform, ship_hitbox, ship_index) in ship_query.iter_mut() {
         for (meteor_transform, meteor_hitbox) in meteor_query.iter() {
@@ -438,7 +438,7 @@ fn destroy_ships(
                 } else {
                     commands
                         .spawn_bundle(SpriteBundle {
-                            texture: asset_server.load("spaceshooter/PNG/Lasers/laserBlue08.png"),
+                            texture: sprites.explosion.clone(),
                             transform: Transform::from_translation(ship_transform.translation)
                                 .with_scale(Vec3::splat(0.9)),
                             ..default()

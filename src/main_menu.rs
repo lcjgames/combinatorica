@@ -1,3 +1,4 @@
+use crate::Sprites;
 use bevy::prelude::*;
 
 use crate::state::*;
@@ -13,13 +14,13 @@ impl Plugin for MainMenu {
     }
 }
 
-fn display_title(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn display_title(mut commands: Commands, sprites: Res<Sprites>) {
     commands
         .spawn_bundle(
             TextBundle::from_section(
                 "Combinatorica",
                 TextStyle {
-                    font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                    font: sprites.font.clone(),
                     font_size: 100.0,
                     color: Color::ALICE_BLUE,
                 },
@@ -34,7 +35,7 @@ fn display_title(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(Screen(AppState::MainMenu));
 }
 
-fn display_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn display_buttons(mut commands: Commands, sprites: Res<Sprites>) {
     commands
         .spawn_bundle(ButtonBundle {
             style: Style {
@@ -51,7 +52,7 @@ fn display_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn_bundle(TextBundle::from_section(
                 "Start",
                 TextStyle {
-                    font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                    font: sprites.font.clone(),
                     font_size: 35.0,
                     color: Color::DARK_GRAY,
                 },

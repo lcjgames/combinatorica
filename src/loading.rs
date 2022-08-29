@@ -1,59 +1,113 @@
+use crate::{screen_cleanup, Screen};
 use bevy::prelude::*;
+use bevy_kira_audio::AudioSource;
 
 use crate::state::AppState;
 
 pub struct Loading;
 
+#[derive(Default)]
+pub struct Sprites {
+    pub font: Handle<Font>,
+    pub cursor: Handle<Image>,
+    //asset_server.load("spaceshooter/PNG/Lasers/laserRed05.png"),
+    pub laser: Handle<Image>,
+    //texture: asset_server.load("spaceshooter/PNG/Meteors/meteorBrown_big1.png"),
+    pub meteor: Handle<Image>,
+    // texture: asset_server.load("spaceshooter/PNG/Lasers/laserBlue08.png"),
+    pub explosion: Handle<Image>,
+    pub main_menu_ost: Handle<AudioSource>,
+    pub editors_ost: Handle<AudioSource>,
+    pub mining_ost: Handle<AudioSource>,
+}
+
 impl Plugin for Loading {
     fn build(&self, app: &mut App) {
-        app.add_state(AppState::Loading)
-            .init_resource::<AssetsLoading>()
-            .init_resource::<SpriteSheets>()
-            .init_resource::<GroundTiles>()
+        app.init_resource::<AssetsLoading>()
+            .init_resource::<Sprites>()
             .add_system_set(SystemSet::on_enter(AppState::Loading).with_system(load))
-            .add_system_set(SystemSet::on_update(AppState::Loading).with_system(check_loading));
+            .add_system_set(SystemSet::on_enter(AppState::Loading).with_system(spawn_text))
+            .add_system_set(SystemSet::on_update(AppState::Loading).with_system(check_loading))
+            .add_system_set(SystemSet::on_exit(AppState::Loading).with_system(screen_cleanup));
     }
 }
 
 #[derive(Default, Deref, DerefMut)]
 struct AssetsLoading(Vec<HandleUntyped>);
 
+fn spawn_text(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands
+        .spawn_bundle(
+            TextBundle::from_section(
+                "Loading...",
+                TextStyle {
+                    font: asset_server.load("fonts/Kenney Future.ttf"),
+                    font_size: 50.0,
+                    color: Color::ALICE_BLUE,
+                },
+            )
+            .with_text_alignment(TextAlignment::TOP_CENTER)
+            .with_style(Style {
+                align_self: AlignSelf::Center,
+                position_type: PositionType::Absolute,
+                ..default()
+            }),
+        )
+        .insert(Screen(AppState::Loading));
+}
+
 fn load(
     server: Res<AssetServer>,
     mut assets_loading: ResMut<AssetsLoading>,
-    mut sprite_sheets: ResMut<SpriteSheets>,
-    mut ground_tiles: ResMut<GroundTiles>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut sprites: ResMut<Sprites>,
 ) {
-    let mut load_asset = |path| {
-        let handle = server.load(path);
+    sprites.font = {
+        let handle = server.load("fonts/Kenney Future.ttf");
         assets_loading.push(handle.clone_untyped());
         handle
     };
-    let mut load_sprite_sheet = |path| {
-        let handle = load_asset(path);
-        let texture_atlas = TextureAtlas::from_grid_with_padding(
-            handle.clone(),
-            Vec2::new(64.0, 64.0),
-            14,
-            7,
-            Vec2::new(32.0, 16.0),
-            Vec2::new(16.0, 0.0),
-        );
-        texture_atlases.add(texture_atlas)
+
+    sprites.cursor = {
+        let handle = server.load("spaceshooter/PNG/UI/cursor.png");
+        assets_loading.push(handle.clone_untyped());
+        handle
     };
-    sprite_sheets.player_fishy = load_sprite_sheet("spaceshooter/sample.png");
-    sprite_sheets.player_orcy = load_sprite_sheet("spaceshooter/sample.png");
-    sprite_sheets.player_pescy = load_sprite_sheet("spaceshooter/sample.png");
-    // spritesheets.player_sharky = load_sprite_sheet("spaceshooter/sample.png");
-    let mut load_ground_tiles = |path| {
-        let handle = load_asset(path);
-        let texture_atlas = TextureAtlas::from_grid(handle.clone(), Vec2::new(32.0, 32.0), 17, 5);
-        texture_atlases.add(texture_atlas)
+
+    sprites.laser = {
+        let handle = server.load("spaceshooter/PNG/Lasers/laserRed05.png");
+        assets_loading.push(handle.clone_untyped());
+        handle
     };
-    ground_tiles.metal = load_ground_tiles("spaceshooter/sample.png");
-    ground_tiles.rock = load_ground_tiles("spaceshooter/sample.png");
-    ground_tiles.wood = load_ground_tiles("spaceshooter/sample.png");
+
+    sprites.meteor = {
+        let handle = server.load("spaceshooter/PNG/Meteors/meteorBrown_big1.png");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
+
+    sprites.explosion = {
+        let handle = server.load("spaceshooter/PNG/Lasers/laserBlue08.png");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
+
+    sprites.main_menu_ost = {
+        let handle = server.load("title_screen.ogg");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
+
+    sprites.editors_ost = {
+        let handle = server.load("battle.ogg");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
+
+    sprites.mining_ost = {
+        let handle = server.load("shop_screen.ogg");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
 }
 
 fn check_loading(

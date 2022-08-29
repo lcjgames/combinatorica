@@ -3,7 +3,7 @@ use enum_iterator::IntoEnumIterator;
 
 #[derive(Debug, Clone, Copy, IntoEnumIterator, PartialEq, Eq, Hash)]
 pub enum AppState {
-    // Loading,
+    Loading,
     MainMenu,
     FleetEditor,
     PartSelection,

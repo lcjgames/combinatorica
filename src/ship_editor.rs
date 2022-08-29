@@ -4,6 +4,7 @@ use bevy::ui::FocusPolicy;
 use crate::parts::*;
 use crate::ship::*;
 use crate::state::*;
+use crate::Sprites;
 
 pub struct ShipEditor;
 
@@ -35,6 +36,7 @@ fn display(
     asset_server: Res<AssetServer>,
     ship: Res<BuildingShip>,
     owned_parts: Res<OwnedParts>,
+    sprites: Res<Sprites>,
 ) {
     commands
         .spawn_bundle(NodeBundle {
@@ -68,7 +70,7 @@ fn display(
                             ..default()
                         })
                         .with_children(|left_side| {
-                            let font = asset_server.load("fonts/Kenney Future.ttf"); //TODO: move loading to loading state
+                            let font = sprites.font.clone();
                             let small_style = TextStyle {
                                 font: font.clone(),
                                 font_size: 25.0,
@@ -164,6 +166,7 @@ fn display(
                                                     PartType::Cockpit,
                                                     ship.cockpit_index,
                                                 ),
+                                                &sprites,
                                             );
                                         });
                                     first_column
@@ -186,6 +189,7 @@ fn display(
                                                 &asset_server,
                                                 &owned_parts
                                                     .get_image(PartType::Wings, ship.wings_index),
+                                                &sprites,
                                             );
                                         });
                                 });
@@ -220,6 +224,7 @@ fn display(
                                                 &asset_server,
                                                 &owned_parts
                                                     .get_image(PartType::Engine, ship.engine_index),
+                                                &sprites,
                                             );
                                         });
                                     second_column
@@ -244,6 +249,7 @@ fn display(
                                                     PartType::Lasergun,
                                                     ship.lasergun_index,
                                                 ),
+                                                &sprites,
                                             );
                                         });
                                 });
@@ -283,7 +289,7 @@ fn display(
                                 TextBundle::from_section(
                                     "Cancel",
                                     TextStyle {
-                                        font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                                        font: sprites.font.clone(),
                                         font_size: 30.0,
                                         color: Color::DARK_GRAY,
                                     },
@@ -315,7 +321,7 @@ fn display(
                                 TextBundle::from_section(
                                     "Create",
                                     TextStyle {
-                                        font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                                        font: sprites.font.clone(),
                                         font_size: 30.0,
                                         color: Color::DARK_GRAY,
                                     },
@@ -332,6 +338,7 @@ fn spawn_choose_button(
     part_type: PartType,
     asset_server: &Res<AssetServer>,
     image: &String,
+    sprites: &Res<Sprites>,
 ) {
     node.spawn_bundle(ButtonBundle {
         style: Style {
@@ -360,7 +367,7 @@ fn spawn_choose_button(
             TextBundle::from_section(
                 format!("{:?}", part_type),
                 TextStyle {
-                    font: asset_server.load("fonts/Kenney Future.ttf"), //TODO: move loading to loading state
+                    font: sprites.font.clone(),
                     font_size: 10.0,
                     color: Color::DARK_GRAY,
                 },
