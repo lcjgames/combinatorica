@@ -309,15 +309,21 @@ fn go_button_activation(
 fn update_strength(
     mut query: Query<&mut Text, With<RightSide>>,
     fleet: Res<Fleet>,
+    owned_parts: Res<OwnedParts>,
     sprites: Res<Sprites>,
 ) {
-    let mut text = query.single_mut();
-    *text = Text::from_sections([TextSection::new(
+    let info = if fleet.0.len() > 0 || owned_parts.at_least_one_each() {
         format!(
             "Fleet Information\nStrength: {:.2}\nCombinations: {}\n",
             fleet.strength(),
             fleet.combination_bonus()
-        ),
+        )
+    } else {
+        "Game over\nRefresh to start again".to_string()
+    };
+    let mut text = query.single_mut();
+    *text = Text::from_sections([TextSection::new(
+        info,
         TextStyle {
             font: sprites.font.clone(),
             font_size: 60.0,
