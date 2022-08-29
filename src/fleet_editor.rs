@@ -118,7 +118,10 @@ fn display_ships(mut commands: Commands, asset_server: Res<AssetServer>, fleet: 
                                                         });
                                                         ship_node.spawn_bundle(ImageBundle {
                                                             image: asset_server
-                                                                .load(ship.wings_sprite.as_str())
+                                                                .load(
+                                                                    ship.flipped_wing_spite
+                                                                        .as_str(),
+                                                                )
                                                                 .into(),
                                                             style: Ship::right_wing_ui_style(),
                                                             focus_policy: FocusPolicy::Pass,

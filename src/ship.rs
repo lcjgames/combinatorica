@@ -23,6 +23,7 @@ impl Strength {
 #[derive(Clone)]
 pub struct Ship {
     pub wings_sprite: String,
+    pub flipped_wing_spite: String, // can't flip in ui node
     pub cockpit_sprite: String,
     pub strength: Strength,
     pub active: bool,

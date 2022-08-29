@@ -26,7 +26,7 @@ impl Default for OwnedParts {
             wings: Vec::new(),
             lasergun: Vec::new(),
         };
-        for i in 0..8 {
+        for _ in 0..8 {
             parts.add_random();
         }
         while !parts.at_least_one_each() {
@@ -47,6 +47,14 @@ impl OwnedParts {
     }
 
     pub fn get_image(&self, part_type: PartType, index: usize) -> String {
+        self.get_image_impl(part_type, index, false)
+    }
+
+    pub fn get_flipped_wing(&self, index: usize) -> String {
+        self.get_image_impl(PartType::Wings, index, true)
+    }
+
+    pub fn get_image_impl(&self, part_type: PartType, index: usize, flipped: bool) -> String {
         let type_name = match part_type {
             PartType::Cockpit => "cockpit",
             PartType::Engine => "engine",
@@ -69,8 +77,12 @@ impl OwnedParts {
             PartType::Lasergun => format!("{:02}", self.lasergun[index].style.number()),
         };
         format!(
-            "spaceshooter/PNG/Parts/{}{}{}{}.png",
-            type_name, color, separator, style
+            "spaceshooter/PNG/Parts/{}{}{}{}{}.png",
+            type_name,
+            color,
+            separator,
+            style,
+            if flipped { "_flipped" } else { "" }
         )
     }
 

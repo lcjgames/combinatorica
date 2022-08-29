@@ -409,6 +409,7 @@ fn ok_button(
             Interaction::Clicked => {
                 fleet.0.push(Ship {
                     wings_sprite: owned_parts.get_image(PartType::Wings, ship.wings_index),
+                    flipped_wing_spite: owned_parts.get_flipped_wing(ship.wings_index),
                     cockpit_sprite: owned_parts.get_image(PartType::Cockpit, ship.cockpit_index),
                     strength: ship.strength(&owned_parts),
                     active: false,
