@@ -104,10 +104,10 @@ struct ExitTimer(Timer);
 #[derive(Component)]
 struct ThatTextOnTheScreen;
 
-fn spawn_target(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_target(mut commands: Commands, sprites: Res<Sprites>) {
     commands
         .spawn_bundle(SpriteBundle {
-            texture: asset_server.load("spaceshooter/PNG/UI/cursor.png"), // TODO: move to loading
+            texture: sprites.cursor.clone(),
             transform: Transform::from_translation(Vec3::Z),
             ..default()
         })

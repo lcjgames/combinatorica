@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::render::render_resource::Texture;
 
 use crate::state::AppState;
 
@@ -7,6 +8,7 @@ pub struct Loading;
 #[derive(Default)]
 pub struct Sprites {
     pub font: Handle<Font>,
+    pub cursor: Handle<Image>,
 }
 
 impl Plugin for Loading {
@@ -26,12 +28,17 @@ fn load(
     mut assets_loading: ResMut<AssetsLoading>,
     mut sprites: ResMut<Sprites>,
 ) {
-    let mut load_asset = |path| {
-        let handle = server.load(path);
+    sprites.font = {
+        let handle = server.load("fonts/Kenney Future.ttf");
         assets_loading.push(handle.clone_untyped());
         handle
     };
-    sprites.font = load_asset("fonts/Kenney Future.ttf");
+
+    sprites.cursor = {
+        let handle = server.load("spaceshooter/PNG/UI/cursor.png");
+        assets_loading.push(handle.clone_untyped());
+        handle
+    };
 }
 
 fn check_loading(
